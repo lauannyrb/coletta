@@ -696,3 +696,84 @@ a:hover { color: var(--color-primary-dark); }
   color: var(--color-primary);
 }
 .error-card .btn { margin-top: 8px; }
+
+
+/* ---------- Ajustes de fidelidade ao Figma (Fase 8) ---------- */
+
+/* Rótulos com a estrela do Brand Guide */
+.eyebrow::before { content: "✦ "; }
+
+/* Detalhe dos cartões de totais */
+.stat-detail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+.stat-detail--up { color: var(--color-success); font-weight: 600; }
+.stat-detail .icon { width: 16px; height: 16px; }
+
+/* Busca com fundo lavanda */
+.search-form input { background: #f6f2fd; border-color: transparent; }
+.search-form input:focus { background: var(--color-surface); }
+
+/* Avatar com iniciais */
+.avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.sidebar-user-id { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+/* Contador do card com a barrinha do Figma */
+.collection-count::before {
+  content: "";
+  width: 3px;
+  height: 12px;
+  margin-right: 6px;
+  border-radius: 2px;
+  background: var(--color-primary);
+}
+
+/* Painel do login */
+.auth-showcase { position: relative; }
+.showcase-chip {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-card);
+}
+.showcase-chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary); }
+.showcase-cards { margin-top: 24px; }
+.showcase-card { transform: rotate(-1.5deg); }
+.showcase-card--shift { transform: rotate(1.5deg); }
+.showcase-quote footer {
+  margin-top: 10px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 760px) {
+  .sidebar-user-id { display: none; }
+}

@@ -15,3 +15,13 @@ def ha_quanto_tempo(value):
     if timezone.now() - value < timedelta(minutes=1):
         return 'agora mesmo'
     return f'há {timesince(value)}'
+
+
+@register.filter
+def iniciais(nome):
+    """'Ana Beatriz Souza' -> 'AS' (primeiro e último nome) para o avatar."""
+    partes = (nome or '').split()
+    if not partes:
+        return '?'
+    letras = partes[0][0] + (partes[-1][0] if len(partes) > 1 else '')
+    return letras.upper()

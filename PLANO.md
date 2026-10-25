@@ -96,5 +96,5 @@ pelo deploy automático. Assim, problemas de infraestrutura aparecem com tempo p
 - [ ] Confirmar 2FA ativo na conta do GitHub (o README afirma)
 
 ## Fase 8 — Visual e extras
-- [ ] Ajuste visual fiel ao protótipo do Figma
+- [x] Ajuste visual fiel ao protótipo do Figma (totais com detalhes reais, avatar, busca lavanda, painel do login)
 - [ ] Imagens (capa e foto de item), somente se sobrar tempo

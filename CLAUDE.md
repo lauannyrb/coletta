@@ -177,7 +177,11 @@ Já feito:
   OWASP. **Se mudar código citado no README, conferir os números de linha.** Evidências em
   `docs/evidencias/` (a usuária salva as capturas).
 
-Próximo passo: capturas em `docs/evidencias/`; depois Fase 8 (ajuste visual conforme o Figma).
+- **Fase 8 (visual):** totais da Início com detalhe real (`total_categories` sem diferenciar caixa,
+  `items_this_month`, `last_collection`), avatar com iniciais (filtro `iniciais`), estrela nos `.eyebrow`,
+  busca lavanda, painel do login com selo e cards inclinados. 43 testes.
+
+Próximo passo: decidir se as imagens (capa/itens) entram; capturas em `docs/evidencias/`.
 
 ### Estrutura esperada
 ```

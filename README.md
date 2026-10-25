@@ -126,7 +126,7 @@ No `.env`, gere uma `SECRET_KEY` própria e, para desenvolvimento, use `DEBUG=Tr
 .venv/bin/python -c "from django.core.management.utils import get_random_secret_key as g; print(g())"
 ```
 
-Testes (42 testes automatizados):
+Testes (43 testes automatizados):
 
 ```bash
 .venv/bin/python manage.py test
@@ -154,15 +154,15 @@ O principal risco de um sistema multiusuário é um usuário acessar dados de ou
 (IDOR). No Coletta, **nenhuma consulta busca um objeto só pelo ID**:
 
 - Coleções são sempre buscadas junto com o dono —
-  [`colecoes/views.py#L20`](colecoes/views.py#L20):
+  [`colecoes/views.py#L22`](colecoes/views.py#L22):
   `get_object_or_404(Collection, pk=pk, user=request.user)`.
-- Itens são buscados pela coleção do dono — [`colecoes/views.py#L24`](colecoes/views.py#L24):
+- Itens são buscados pela coleção do dono — [`colecoes/views.py#L26`](colecoes/views.py#L26):
   `get_object_or_404(CollectionItem, pk=pk, collection__user=request.user)`.
 - Ao criar um item, a coleção de destino também passa pela verificação de dono
-  ([`colecoes/views.py#L107`](colecoes/views.py#L107)); o ID vindo do navegador nunca é confiado.
+  ([`colecoes/views.py#L116`](colecoes/views.py#L116)); o ID vindo do navegador nunca é confiado.
 - Listagens, totais e busca partem sempre do usuário logado
-  ([`colecoes/views.py#L153`](colecoes/views.py#L153)).
-- O dono é definido no servidor ([`colecoes/views.py#L62`](colecoes/views.py#L62)) e os formulários não
+  ([`colecoes/views.py#L162`](colecoes/views.py#L162)).
+- O dono é definido no servidor ([`colecoes/views.py#L71`](colecoes/views.py#L71)) e os formulários não
   têm campo `user` nem `collection` ([`colecoes/forms.py#L5`](colecoes/forms.py#L5)): um `user` forjado no
   POST é ignorado (há teste para isso).
 - Todas as views privadas usam `@login_required`.
@@ -171,7 +171,7 @@ O principal risco de um sistema multiusuário é um usuário acessar dados de ou
 - Exclusões só acontecem por POST (o GET apenas mostra a confirmação).
 - O `/admin/` do Django só existe em desenvolvimento ([`config/urls.py#L28`](config/urls.py#L28)).
 
-**Teste de acesso cruzado** ([`colecoes/tests.py#L177`](colecoes/tests.py#L177)): a usuária B tenta ver,
+**Teste de acesso cruzado** ([`colecoes/tests.py#L191`](colecoes/tests.py#L191)): a usuária B tenta ver,
 editar e excluir a coleção da usuária A, editar e excluir um item dela e criar um item na coleção dela.
 Todas as tentativas recebem 404 e nada é alterado:
 
@@ -216,7 +216,7 @@ Ran 7 tests ... OK
 ### A05 – Injection
 
 - **SQL:** todo acesso ao banco usa o ORM do Django, que gera consultas parametrizadas. Não existe SQL
-  escrito à mão no projeto. A busca usa `name__icontains` ([`colecoes/views.py#L158`](colecoes/views.py#L158)),
+  escrito à mão no projeto. A busca usa `name__icontains` ([`colecoes/views.py#L167`](colecoes/views.py#L167)),
   com o termo limitado a 100 caracteres.
 - **Entrada de dados:** todos os dados passam por `Form`/`ModelForm`, que validam tipo, campos
   obrigatórios, espaços e tamanho máximo antes de chegar ao banco.
@@ -367,7 +367,7 @@ flowchart TD
 
     subgraph CI["Job 1 · Testes e verificações"]
         B["Python 3.14 + dependências<br/>(uv)"] --> C["check --deploy<br/>qualquer aviso reprova"]
-        C --> T["42 testes automatizados"]
+        C --> T["43 testes automatizados"]
         T --> P["pip-audit<br/>vulnerabilidade conhecida reprova"]
     end
 

@@ -131,6 +131,20 @@ class HomeTests(BaseTestCase):
         self.assertEqual(response.context['total_items'], 2)
         self.assertNotContains(response, 'Da Bia')
 
+    def test_detalhes_dos_totais(self):
+        vinis = Collection.objects.create(user=self.ana, name='Vinis')
+        CollectionItem.objects.create(collection=vinis, name='Disco 1', category='Jazz')
+        CollectionItem.objects.create(collection=vinis, name='Disco 2', category='jazz')
+        CollectionItem.objects.create(collection=vinis, name='Disco 3', category='MPB')
+        CollectionItem.objects.create(collection=vinis, name='Disco 4')
+        da_bia = Collection.objects.create(user=self.bia, name='Da Bia')
+        CollectionItem.objects.create(collection=da_bia, name='Item', category='Rock')
+
+        response = self.client.get(reverse('home'))
+        self.assertEqual(response.context['total_categories'], 2)  # Jazz/jazz contam como uma
+        self.assertEqual(response.context['items_this_month'], 4)
+        self.assertEqual(response.context['last_collection'], vinis)
+
     def test_totais_atualizam_depois_de_excluir(self):
         collection = Collection.objects.create(user=self.ana, name='Vinis')
         CollectionItem.objects.create(collection=collection, name='Disco')

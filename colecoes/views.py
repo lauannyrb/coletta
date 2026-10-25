@@ -1,7 +1,9 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Max
+from django.db.models import Count
+from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
 from .forms import CollectionForm, CollectionItemForm
@@ -37,10 +39,17 @@ def _touch(collection):
 @login_required
 def home(request):
     collections = _user_collections(request.user)
+    items = CollectionItem.objects.filter(collection__user=request.user)
+    month_start = timezone.localtime().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     context = {
         'total_collections': collections.count(),
-        'total_items': CollectionItem.objects.filter(collection__user=request.user).count(),
-        'last_update': request.user.collections.aggregate(last=Max('updated_at'))['last'],
+        'total_items': items.count(),
+        # "Jazz" e "jazz" contam como a mesma categoria
+        'total_categories': (
+            items.exclude(category='').values(cat=Lower('category')).distinct().count()
+        ),
+        'items_this_month': items.filter(created_at__gte=month_start).count(),
+        'last_collection': request.user.collections.order_by('-updated_at').first(),
         'recent_collections': collections[:4],
     }
     return render(request, 'colecoes/home.html', context)

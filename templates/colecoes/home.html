@@ -20,6 +20,9 @@
     <div>
       <p class="stat-label">Total de coleções</p>
       <p class="stat-value">{{ total_collections }}</p>
+      <p class="stat-detail">
+        {% if total_categories %}Itens em {{ total_categories }} {{ total_categories|pluralize:"categoria,categorias" }}{% elif total_items %}Itens ainda sem categoria{% else %}Nenhum item cadastrado ainda{% endif %}
+      </p>
     </div>
     <span class="stat-icon">{% include "partials/icon.html" with name="folder" %}</span>
   </div>
@@ -27,15 +30,27 @@
     <div>
       <p class="stat-label">Itens cadastrados</p>
       <p class="stat-value">{{ total_items }}</p>
+      {% if items_this_month %}
+        <p class="stat-detail stat-detail--up">
+          {% include "partials/icon.html" with name="trend-up" %}
+          +{{ items_this_month }} {{ items_this_month|pluralize:"adicionado,adicionados" }} este mês
+        </p>
+      {% else %}
+        <p class="stat-detail">Nenhum item novo este mês</p>
+      {% endif %}
     </div>
     <span class="stat-icon">{% include "partials/icon.html" with name="sparkles" %}</span>
   </div>
   <div class="stat-card">
     <div>
       <p class="stat-label">Última atualização</p>
-      <p class="stat-value stat-value--sm">
-        {% if last_update %}{{ last_update|date:"d/m/Y, H:i" }}{% else %}—{% endif %}
-      </p>
+      {% if last_collection %}
+        <p class="stat-value stat-value--sm">{{ last_collection.updated_at|date:"d/m/Y, H:i" }}</p>
+        <p class="stat-detail">Coleção “{{ last_collection.name|truncatechars:28 }}”</p>
+      {% else %}
+        <p class="stat-value stat-value--sm">—</p>
+        <p class="stat-detail">Crie sua primeira coleção</p>
+      {% endif %}
     </div>
     <span class="stat-icon">{% include "partials/icon.html" with name="clock" %}</span>
   </div>
