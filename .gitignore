@@ -1,0 +1,37 @@
+# Ambiente virtual e Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Segredos e configuração local (NUNCA commitar)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+*.ppk
+
+# Banco de dados local
+db.sqlite3
+db.sqlite3-journal
+*.sqlite3
+
+# Arquivos gerados pelo Django
+staticfiles/
+media/
+
+# Logs
+*.log
+
+# IDEs e sistema
+.idea/
+.vscode/
+*.swp
+.DS_Store
