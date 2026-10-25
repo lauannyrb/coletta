@@ -1,0 +1,12 @@
+# /etc/fail2ban/jail.local
+# Requisito da disciplina: 4 tentativas erradas no SSH = banimento de 24h.
+[sshd]
+enabled  = true
+port     = ssh
+backend  = systemd
+# Com senha desabilitada, os robôs só geram "Connection closed by authenticating user ... [preauth]",
+# que o modo normal ignora (testado com fail2ban-regex: normal = 0 falhas, aggressive = 6).
+mode     = aggressive
+maxretry = 4
+findtime = 10m
+bantime  = 24h

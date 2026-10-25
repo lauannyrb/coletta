@@ -279,7 +279,14 @@ acesso cruzado (usuário B tentando acessar `/colecoes/<id>/` do usuário A e re
 ## 10. Infraestrutura e deploy
 
 ### Servidor
-- VM no free tier com Ubuntu Server ou Debian (provedor e distro ainda não definidos).
+- **Oracle Cloud (OCI), Always Free**: VM `VM.Standard.E2.1.Micro` (x86_64, 1 GB RAM + swap de 2 GB),
+  **Ubuntu 26.04 LTS**, **OpenSSL 3.5.5** (suporta `X25519MLKEM768` nativamente).
+- IP público: **137.131.137.14** (região São Paulo). Acesso: `ssh -i ~/.ssh/coletta_oci ubuntu@137.131.137.14`.
+- Arquivos de configuração do servidor versionados em `deploy/` (copiados manualmente para o servidor).
+  Debian foi descartado porque a OCI não tem imagem oficial dele (exigiria importar imagem própria).
+- Particularidades da OCI: usuário padrão `ubuntu`; recursos Always Free só na *home region*; as portas
+  precisam ser liberadas em **dois lugares**: Security List/NSG da VCN **e** o iptables da própria imagem
+  (`/etc/iptables/rules.v4`, que por padrão só libera a 22). Não usar `ufw` junto com essas regras.
 - Python 3.14 instalado via **uv** no servidor (mesma versão do desenvolvimento).
 - Usuário próprio para a aplicação (não rodar como root).
 - Gunicorn via systemd, escutando em socket Unix; Nginx como proxy reverso e servindo `staticfiles/`.
@@ -342,7 +349,6 @@ Seguir as fases do `PLANO.md`. Em resumo:
 O servidor e o pipeline vêm cedo de propósito: são o que mais pesa na nota e o que mais pode dar problema.
 
 ## 13. Decisões pendentes
-- Provedor de nuvem e distribuição (Ubuntu ou Debian).
 - Se as imagens entram na entrega.
 
 ## 14. Convenções para o Claude Code

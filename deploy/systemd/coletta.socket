@@ -1,0 +1,13 @@
+# /etc/systemd/system/coletta.socket
+# Socket Unix entre o Nginx e o Gunicorn: só o www-data (Nginx) consegue conectar.
+[Unit]
+Description=Socket do Gunicorn (Coletta)
+
+[Socket]
+ListenStream=/run/coletta.sock
+SocketUser=www-data
+SocketGroup=www-data
+SocketMode=0600
+
+[Install]
+WantedBy=sockets.target

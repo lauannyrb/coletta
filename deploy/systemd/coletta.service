@@ -1,0 +1,28 @@
+# /etc/systemd/system/coletta.service
+[Unit]
+Description=Coletta (Gunicorn)
+Requires=coletta.socket
+After=network.target
+
+[Service]
+User=coletta
+Group=coletta
+WorkingDirectory=/srv/coletta/app
+ExecStart=/srv/coletta/app/.venv/bin/gunicorn --workers 2 --bind unix:/run/coletta.sock config.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=on-failure
+
+# Endurecimento: o processo só escreve em /var/lib/coletta (banco e cache)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/coletta
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target

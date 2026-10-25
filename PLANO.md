@@ -30,11 +30,16 @@ pelo deploy automático. Assim, problemas de infraestrutura aparecem com tempo p
 - [x] Testes: cadastro, e-mail duplicado, login certo/errado, logout bloqueia páginas privadas
 
 ## Fase 2 — Servidor (cedo, para dar tempo de errar)
-- [ ] Escolher provedor e distro (Ubuntu ou Debian, versão estável mais recente)
-- [ ] Criar VM free tier; usuário próprio para a aplicação (não root)
-- [ ] SSH só com chave: `PasswordAuthentication no`, `PermitRootLogin no`
-- [ ] Firewall / Security Group: somente 22, 80, 443
-- [ ] Fail2Ban no sshd: `maxretry = 4`, `bantime = 24h`
+- [x] Escolher provedor e distro: Oracle Cloud (Always Free) + Ubuntu Server LTS
+- [x] Criar VM free tier
+- [ ] Usuário próprio para a aplicação (não root)
+- [x] SSH só com chave: `PasswordAuthentication no`, `PermitRootLogin no`
+- [x] Firewall / Security Group: somente 22, 80, 443 (Security List da OCI + `/etc/iptables/rules.v4`)
+- [x] Fail2Ban no sshd: `maxretry = 4`, `bantime = 24h`
+- [x] Filtro do Fail2Ban em `mode = aggressive` (o `normal` não contava as tentativas dos robôs)
+- [ ] **Teste 2 do Fail2Ban (lembrar a usuária):** de OUTRO IP (celular no 4G), 5× `ssh naoexiste@IP`;
+      print do `fail2ban-client status sshd` com o IP banido; depois `fail2ban-client set sshd unbanip <IP>`.
+      Nunca testar do IP de casa (ban de 24h)
 - [ ] uv + Python 3.14; clonar o projeto; `.env` de produção com `SECRET_KEY` própria
 - [ ] `db.sqlite3` de produção fora da pasta sobrescrita pelo deploy
 - [ ] Gunicorn como serviço systemd (socket Unix)

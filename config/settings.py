@@ -41,6 +41,9 @@ ALLOWED_HOSTS = [
 
 # True em produção (atrás do Nginx): o IP do cliente passa a vir do cabeçalho X-Real-IP
 BEHIND_PROXY = os.environ.get('BEHIND_PROXY', 'False').lower() == 'true'
+if BEHIND_PROXY:
+    # O Nginx termina o HTTPS e avisa o Django pelo cabeçalho (sem isso, o CSRF recusa o login em HTTPS)
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition
@@ -95,7 +98,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        # Em produção fica fora da pasta do código (ex.: /var/lib/coletta/db.sqlite3)
+        'NAME': os.environ.get('DATABASE_PATH', BASE_DIR / 'db.sqlite3'),
     }
 }
 
