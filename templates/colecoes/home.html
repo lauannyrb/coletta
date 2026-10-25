@@ -1,0 +1,18 @@
+{% extends "app_base.html" %}
+
+{% block title %}Início{% endblock %}
+
+{% block content %}
+<header class="page-header">
+  <p class="eyebrow">Painel do acervo</p>
+  <h1>Olá, {{ user.name }}! Vamos organizar suas coleções?</h1>
+  <p class="page-subtitle">Aqui vai aparecer o resumo do seu acervo pessoal.</p>
+</header>
+
+{# Provisório (Fase 1): totais, recentes e CRUD de coleções entram na Fase 4 #}
+<section class="empty-state">
+  <span class="empty-state-icon">{% include "partials/icon.html" with name="folder" %}</span>
+  <h2>Seu acervo ainda está vazio</h2>
+  <p>Em breve você poderá criar sua primeira coleção por aqui.</p>
+</section>
+{% endblock %}

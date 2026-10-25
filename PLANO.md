@@ -21,13 +21,13 @@ pelo deploy automático. Assim, problemas de infraestrutura aparecem com tempo p
 - [ ] Conferir com `git status` que `.env`, `db.sqlite3` e `.venv/` não aparecem
 
 ## Fase 1 — Autenticação
-- [ ] `base.html` com navbar, área de mensagens e parciais
-- [ ] Cadastro (nome, e-mail, senha, confirmação), com e-mail único case-insensitive
-- [ ] Login por e-mail com mensagem genérica de erro
-- [ ] Logout via POST + CSRF
-- [ ] Página inicial protegida por `@login_required` (provisória)
-- [ ] django-axes (limite de tentativas no login) e rate limit no cadastro
-- [ ] Testes: cadastro, e-mail duplicado, login certo/errado, logout bloqueia páginas privadas
+- [x] `base.html` com navbar, área de mensagens e parciais
+- [x] Cadastro (nome, e-mail, senha, confirmação), com e-mail único case-insensitive
+- [x] Login por e-mail com mensagem genérica de erro
+- [x] Logout via POST + CSRF
+- [x] Página inicial protegida por `@login_required` (provisória)
+- [x] django-axes (limite de tentativas no login) e rate limit no cadastro
+- [x] Testes: cadastro, e-mail duplicado, login certo/errado, logout bloqueia páginas privadas
 
 ## Fase 2 — Servidor (cedo, para dar tempo de errar)
 - [ ] Escolher provedor e distro (Ubuntu ou Debian, versão estável mais recente)
@@ -38,7 +38,8 @@ pelo deploy automático. Assim, problemas de infraestrutura aparecem com tempo p
 - [ ] uv + Python 3.14; clonar o projeto; `.env` de produção com `SECRET_KEY` própria
 - [ ] `db.sqlite3` de produção fora da pasta sobrescrita pelo deploy
 - [ ] Gunicorn como serviço systemd (socket Unix)
-- [ ] Nginx: proxy reverso + `staticfiles/`
+- [ ] Nginx: proxy reverso + `staticfiles/`; `proxy_set_header X-Real-IP $remote_addr` e
+      `BEHIND_PROXY=True` no `.env` (IP real para o django-axes e o rate limit)
 - [ ] Certbot 5.4+ com certificado para o IP (perfil `shortlived`, ~6 dias); timer de renovação ativo;
       `certbot renew --dry-run`
 - [ ] Redirect 80 → 443; TLS 1.2/1.3; HSTS

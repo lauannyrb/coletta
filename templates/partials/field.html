@@ -1,0 +1,23 @@
+{% comment %}
+Campo de formulário com rótulo, ícone opcional, ajuda e erros.
+Uso: {% include "partials/field.html" with field=form.email icon="mail" %}
+O Django já adiciona aria-invalid e aria-describedby (ids _helptext e _error) ao input.
+{% endcomment %}
+<div class="field{% if field.errors %} field--error{% endif %}">
+  <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required" aria-hidden="true">*</span>{% endif %}</label>
+  <div class="input-wrap{% if icon %} input-wrap--icon{% endif %}">
+    {% if icon %}{% include "partials/icon.html" with name=icon %}{% endif %}
+    {{ field }}
+  </div>
+  {% if field.errors %}
+  <ul class="field-errors" id="{{ field.auto_id }}_error">
+    {% for error in field.errors %}
+    <li>{% include "partials/icon.html" with name="alert" %}{{ error }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% if field.help_text %}
+  {# help_text vem do código (validadores de senha do Django), nunca do usuário #}
+  <div class="field-help" id="{{ field.auto_id }}_helptext">{{ field.help_text|safe }}</div>
+  {% endif %}
+</div>

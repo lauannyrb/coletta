@@ -1,0 +1,13 @@
+{% extends "auth_base.html" %}
+
+{% block title %}Muitas tentativas{% endblock %}
+
+{% block content %}
+<header class="auth-header">
+  <h1>Muitas tentativas.</h1>
+  <p>Por segurança, novas tentativas deste endereço estão temporariamente bloqueadas.
+     Aguarde um pouco e tente novamente.</p>
+</header>
+
+<p class="auth-switch"><a href="{% url 'login' %}">Voltar para o login</a></p>
+{% endblock %}

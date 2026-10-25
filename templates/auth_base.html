@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block body_class %}page-auth{% endblock %}
+
+{% block body %}
+<main class="auth-card">
+  <section class="auth-form">
+    {% include "partials/logo.html" %}
+    {% include "partials/messages.html" %}
+    {% block content %}{% endblock %}
+  </section>
+
+  {# Painel decorativo, sem dados: só reforça a identidade visual #}
+  <aside class="auth-showcase" aria-hidden="true">
+    <div class="showcase-cards">
+      <div class="showcase-card">
+        <span class="showcase-icon">{% include "partials/icon.html" with name="star" %}</span>
+        <div>
+          <strong>Bonecas colecionáveis</strong>
+          <span>Primeiras edições</span>
+        </div>
+      </div>
+      <div class="showcase-card showcase-card--shift">
+        <span class="showcase-icon">{% include "partials/icon.html" with name="camera" %}</span>
+        <div>
+          <strong>Câmeras analógicas</strong>
+          <span>Lentes 35mm e corpos manuais</span>
+        </div>
+      </div>
+      <div class="showcase-card">
+        <span class="showcase-icon">{% include "partials/icon.html" with name="disc" %}</span>
+        <div>
+          <strong>Discos de vinil</strong>
+          <span>Jazz, MPB e bossa nova</span>
+        </div>
+      </div>
+    </div>
+    <blockquote class="showcase-quote">
+      <p>“Feito para quem guarda memórias em forma de objetos.”</p>
+    </blockquote>
+  </aside>
+</main>
+{% endblock %}

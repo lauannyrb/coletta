@@ -39,6 +39,9 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
+# True em produção (atrás do Nginx): o IP do cliente passa a vir do cabeçalho X-Real-IP
+BEHIND_PROXY = os.environ.get('BEHIND_PROXY', 'False').lower() == 'true'
+
 
 # Application definition
 
@@ -51,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'colecoes',
+    'axes',
 ]
 
 MIDDLEWARE = [
@@ -61,6 +65,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Deve ser o último: transforma o bloqueio do django-axes em resposta 429
+    'axes.middleware.AxesMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -96,6 +102,35 @@ DATABASES = {
 
 # Usuário personalizado com login por e-mail
 AUTH_USER_MODEL = 'accounts.User'
+
+AUTHENTICATION_BACKENDS = [
+    # Precisa vir primeiro para barrar tentativas de quem está bloqueado
+    'axes.backends.AxesStandaloneBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'login'
+
+
+# django-axes: limite de tentativas de login
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1  # horas de bloqueio; falhas mais antigas que isso são descartadas
+# Bloqueio por IP. Sem AXES_RESET_ON_SUCCESS: senão um atacante com conta própria poderia
+# zerar o contador logando na própria conta entre uma tentativa e outra.
+AXES_LOCKOUT_PARAMETERS = ['ip_address']
+AXES_LOCKOUT_TEMPLATE = 'accounts/bloqueado.html'
+AXES_CLIENT_IP_CALLABLE = 'accounts.utils.get_client_ip'
+
+
+# Cache em arquivo: compartilhado entre os workers do Gunicorn (usado pelo rate limit do cadastro)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.environ.get('CACHE_DIR', BASE_DIR / '.cache'),
+    }
+}
 
 
 # Password validation

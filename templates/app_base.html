@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block body_class %}page-app{% endblock %}
+
+{% block body %}
+<div class="app-shell">
+  <aside class="sidebar">
+    {% include "partials/logo.html" %}
+
+    <nav class="sidebar-nav" aria-label="Navegação principal">
+      {% url 'home' as home_url %}
+      <a href="{{ home_url }}"{% if request.path == home_url %} aria-current="page"{% endif %}>
+        {% include "partials/icon.html" with name="grid" %}
+        Início
+      </a>
+    </nav>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-info">
+        <strong>{{ user.name }}</strong>
+        <span>{{ user.email }}</span>
+      </div>
+      {# Logout por POST com CSRF; nunca por link GET #}
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-secondary btn-sm">
+          {% include "partials/icon.html" with name="logout" %}
+          Sair
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <main class="app-main">
+    {% include "partials/messages.html" %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% endblock %}

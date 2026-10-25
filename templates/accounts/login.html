@@ -1,0 +1,24 @@
+{% extends "auth_base.html" %}
+
+{% block title %}Entrar{% endblock %}
+
+{% block content %}
+<header class="auth-header">
+  <h1>Suas coleções,<br><span class="accent">do seu jeito.</span></h1>
+  <p>Acesse seu catálogo pessoal e continue organizando o que você ama com cuidado e carinho.</p>
+</header>
+
+<form method="post" class="form" novalidate>
+  {% csrf_token %}
+  {% include "partials/form_errors.html" %}
+  {% include "partials/field.html" with field=form.username icon="mail" %}
+  {% include "partials/field.html" with field=form.password icon="lock" %}
+  <input type="hidden" name="next" value="{{ next }}">
+  <button type="submit" class="btn btn-primary btn-block">
+    Entrar no Coletta
+    {% include "partials/icon.html" with name="arrow-right" %}
+  </button>
+</form>
+
+<p class="auth-switch">Ainda não tem uma conta? <a href="{% url 'signup' %}">Criar uma conta</a></p>
+{% endblock %}

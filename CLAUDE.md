@@ -126,7 +126,18 @@ Já feito:
 - Usuário personalizado `accounts.User` (login por e-mail, `AUTH_USER_MODEL = "accounts.User"`), com testes.
 - Modelos `Collection` e `CollectionItem` criados e migrados.
 
-Próximo passo: repositório no GitHub e primeiro commit; depois Fase 1 (autenticação).
+- **Fase 1 (autenticação) concluída:**
+  - Templates: `base.html` → `auth_base.html` (login/cadastro, painel decorativo) e `app_base.html`
+    (sidebar + botão "Sair" em POST). Parciais em `templates/partials/` (`field.html`, `icon.html` com SVGs,
+    `messages.html`, `form_errors.html`, `logo.html`). CSS em `static/css/app.css`; fonte em `static/fonts/`.
+  - Rotas: `/entrar/` (`LoginView` + `LoginForm`), `/sair/` (`LogoutView`, só POST), `/cadastro/`
+    (`accounts.views.signup`), `/` (`colecoes.views.home`, provisória).
+  - django-axes: 5 falhas por IP → bloqueio de 1h (429, template `accounts/bloqueado.html`), sem reset no
+    sucesso. Rate limit do cadastro: 10 POST/h por IP (`accounts/ratelimit.py`, cache em arquivo `.cache/`).
+  - IP do cliente via `accounts.utils.get_client_ip`: usa `X-Real-IP` só com `BEHIND_PROXY=True`.
+  - 16 testes em `accounts/tests.py`.
+
+Próximo passo: Fase 2 (servidor). Repositório no GitHub ainda pendente (a usuária faz o push).
 
 ### Estrutura esperada
 ```
@@ -272,6 +283,9 @@ acesso cruzado (usuário B tentando acessar `/colecoes/<id>/` do usuário A e re
 - Python 3.14 instalado via **uv** no servidor (mesma versão do desenvolvimento).
 - Usuário próprio para a aplicação (não rodar como root).
 - Gunicorn via systemd, escutando em socket Unix; Nginx como proxy reverso e servindo `staticfiles/`.
+- Nginx deve enviar `proxy_set_header X-Real-IP $remote_addr;` e o `.env` de produção ter
+  `BEHIND_PROXY=True`; sem isso o django-axes e o rate limit enxergam o mesmo IP para todos.
+- `CACHE_DIR` de produção fora da pasta sobrescrita pelo deploy (ex.: `/var/lib/coletta/cache`).
 - `.env` de produção criado manualmente no servidor, com `SECRET_KEY` diferente da de desenvolvimento.
 - `db.sqlite3` de produção fora da pasta sobrescrita pelo deploy (ou protegido dela) e incluído em backup.
 - Firewall/Security Group: apenas 22, 80 e 443.
