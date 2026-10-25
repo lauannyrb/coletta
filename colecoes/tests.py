@@ -211,6 +211,12 @@ class AccessControlTests(BaseTestCase):
         self.assertEqual(de_outro.status_code, inexistente.status_code)
         self.assertEqual(de_outro.content, inexistente.content)
 
+    def test_404_usa_pagina_propria_sem_detalhes_tecnicos(self):
+        response = self.client.get(reverse('collection_detail', args=[self.collection.pk]))
+        self.assertTemplateUsed(response, '404.html')
+        self.assertContains(response, 'Página não encontrada', status_code=404)
+        self.assertNotContains(response, 'Collection', status_code=404)
+
     def test_listagem_nao_mostra_colecoes_de_outro_usuario(self):
         response = self.client.get(reverse('collection_list'))
         self.assertNotContains(response, 'Da Ana')

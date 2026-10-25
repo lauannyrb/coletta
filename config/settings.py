@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 import os
 from pathlib import Path
 
+from django.utils.csp import CSP
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -62,6 +63,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'django.middleware.csp.ContentSecurityPolicyMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -126,6 +128,8 @@ AXES_COOLOFF_TIME = 1  # horas de bloqueio; falhas mais antigas que isso são de
 AXES_LOCKOUT_PARAMETERS = ['ip_address']
 AXES_LOCKOUT_TEMPLATE = 'accounts/bloqueado.html'
 AXES_CLIENT_IP_CALLABLE = 'accounts.utils.get_client_ip'
+# Nos logs, o e-mail tentado fica mascarado (dado pessoal), mas o IP aparece para investigar ataques
+AXES_SENSITIVE_PARAMETERS = ['username']
 
 
 # Cache em arquivo: compartilhado entre os workers do Gunicorn (usado pelo rate limit do cadastro)
@@ -188,3 +192,70 @@ if DEBUG:
             'BACKEND': 'django.core.mail.backends.console.EmailBackend',
         },
     }
+
+
+# Segurança (OWASP A02 – Security Misconfiguration)
+# https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
+
+SESSION_COOKIE_HTTPONLY = True        # cookie de sessão inacessível ao JavaScript
+SESSION_COOKIE_AGE = 60 * 60 * 8      # sessão expira em 8 horas
+X_FRAME_OPTIONS = 'DENY'              # nenhuma página pode ser exibida dentro de um <iframe>
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = 'same-origin'
+
+# Content Security Policy: só recursos do próprio servidor. Os templates não têm JS nem CSS inline,
+# e CSS e fontes são servidos localmente (sem CDN).
+CSP_POLICY = {
+    'default-src': [CSP.SELF],
+    'script-src': [CSP.SELF],
+    'style-src': [CSP.SELF],
+    'img-src': [CSP.SELF],
+    'font-src': [CSP.SELF],
+    'connect-src': [CSP.SELF],
+    'form-action': [CSP.SELF],
+    'object-src': [CSP.NONE],
+    'base-uri': [CSP.NONE],
+    'frame-ancestors': [CSP.NONE],
+}
+
+if DEBUG:
+    # Em desenvolvimento a CSP só registra violações no console do navegador: as páginas de erro
+    # do modo debug usam estilos inline e ficariam quebradas com a política aplicada.
+    SECURE_CSP_REPORT_ONLY = CSP_POLICY
+else:
+    SECURE_CSP = CSP_POLICY
+    # O site só existe em HTTPS (o Nginx também redireciona; aqui é uma segunda camada)
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    CSRF_TRUSTED_ORIGINS = [f'https://{host}' for host in ALLOWED_HOSTS]
+
+SILENCED_SYSTEM_CHECKS = [
+    # O HSTS é enviado pelo Nginx em todas as respostas (deploy/nginx/coletta.conf). No Django, o
+    # check --deploy exigiria includeSubDomains e preload, que não se aplicam a um endereço IP.
+    'security.W004',
+]
+
+
+# Logging (OWASP A09 – Security Logging and Alerting Failures)
+# Vai para a saída padrão do Gunicorn, que o systemd guarda no journal:
+#   journalctl -u coletta.service
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simples': {'format': '{asctime} {levelname} {name}: {message}', 'style': '{'},
+    },
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler', 'formatter': 'simples'},
+    },
+    'loggers': {
+        # Falhas de login e bloqueios (django-axes)
+        'axes': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+        # CSRF inválido, Host não permitido e outras ocorrências de segurança
+        'django.security': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+        # Erros 5xx
+        'django.request': {'handlers': ['console'], 'level': 'ERROR', 'propagate': False},
+    },
+}

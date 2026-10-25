@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{# Páginas de erro: mensagem amigável, sem detalhes técnicos (RN34) #}
+
+{% block body_class %}page-auth{% endblock %}
+
+{% block body %}
+<main class="error-card">
+  {% include "partials/logo.html" %}
+  <p class="error-code">{% block code %}{% endblock %}</p>
+  <h1>{% block heading %}{% endblock %}</h1>
+  <p>{% block message %}{% endblock %}</p>
+  <a class="btn btn-primary" href="{% url 'home' %}">Voltar ao início</a>
+</main>
+{% endblock %}

@@ -29,7 +29,7 @@ uv pip sync --quiet requirements.txt
 
 .venv/bin/python manage.py migrate --noinput
 .venv/bin/python manage.py collectstatic --noinput --verbosity 0
-.venv/bin/python manage.py check --deploy --fail-level ERROR
+.venv/bin/python manage.py check --deploy --fail-level WARNING
 
 sudo /usr/bin/systemctl restart coletta.service
 echo "Deploy concluído: $(git rev-parse --short HEAD)"

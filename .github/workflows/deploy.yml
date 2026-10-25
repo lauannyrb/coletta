@@ -39,10 +39,13 @@ jobs:
           echo "::add-mask::$key"
           echo "SECRET_KEY=$key" >> "$GITHUB_ENV"
 
-      - name: Django check --deploy
-        run: .venv/bin/python manage.py check --deploy --fail-level ERROR
+      - name: Django check --deploy (falha com qualquer aviso)
+        run: .venv/bin/python manage.py check --deploy --fail-level WARNING
 
       - name: Testes
+        # Com DEBUG=False o Django redirecionaria tudo para HTTPS e o cliente de testes usa HTTP
+        env:
+          DEBUG: 'True'
         run: .venv/bin/python manage.py test
 
       - name: Auditoria de dependências (pip-audit)

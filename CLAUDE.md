@@ -165,7 +165,15 @@ Já feito:
   template `ha_quanto_tempo` (`colecoes/templatetags/colecoes_extras.py`). 41 testes (16 de autenticação +
   25 de CRUD, totais, busca e isolamento com 404).
 
-Próximo passo: Fase 6 (endurecimento de produção: cookies seguros, CSP, logging, `check --deploy` limpo).
+- **Fase 6 (endurecimento):** em `config/settings.py`, com `DEBUG=False`: `SECURE_SSL_REDIRECT`, cookies
+  `Secure`, `CSRF_TRUSTED_ORIGINS` derivado do `ALLOWED_HOSTS` e CSP aplicada (`SECURE_CSP`); com
+  `DEBUG=True` a CSP é só report-only (as páginas de debug usam estilo inline). HSTS só no Nginx
+  (`security.W004` silenciado). Sessão de 8h. `LOGGING` manda `axes`, `django.security` e `django.request`
+  para o journal (`journalctl -u coletta.service`). `/admin/` só com `DEBUG=True`. Páginas `404.html`,
+  `500.html` e `403_csrf.html` (base `error_base.html`). CI roda os testes com `DEBUG=True` (senão o
+  redirect HTTPS quebraria o cliente de testes) e o `check --deploy` com `--fail-level WARNING`.
+
+Próximo passo: Fase 7 (README como relatório técnico).
 
 ### Estrutura esperada
 ```

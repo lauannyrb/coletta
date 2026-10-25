@@ -76,10 +76,14 @@ pelo deploy automático. Assim, problemas de infraestrutura aparecem com tempo p
 - [x] Validação de campos vazios, só com espaços e longos demais
 
 ## Fase 6 — Endurecimento de produção
-- [ ] Cookies `Secure`/`HttpOnly`, `SECURE_PROXY_SSL_HEADER`, `CSRF_TRUSTED_ORIGINS`
-- [ ] HSTS, `nosniff`, `X_FRAME_OPTIONS = "DENY"`, CSP restrita a `'self'`
-- [ ] Logging de falhas de login (django-axes + logging do Django)
-- [ ] `check --deploy` sem avisos relevantes; depois trocar para `--fail-level WARNING` no workflow e no `deploy/coletta-deploy`
+- [x] Cookies `Secure`/`HttpOnly`, sessão de 8h, `SECURE_PROXY_SSL_HEADER`, `CSRF_TRUSTED_ORIGINS`
+- [x] `SECURE_SSL_REDIRECT`, `nosniff`, `X_FRAME_OPTIONS = "DENY"`, CSP nativa do Django restrita a `'self'`
+      (HSTS fica no Nginx; `security.W004` silenciado com justificativa)
+- [x] Logging de falhas de login (django-axes, IP visível e e-mail mascarado) e de `django.security`
+- [x] Páginas 404, 500 e 403 (CSRF) próprias, sem detalhes técnicos
+- [x] `/admin/` só existe com `DEBUG=True`
+- [x] `check --deploy` sem avisos; `--fail-level WARNING` no workflow e no `deploy/coletta-deploy`
+- [ ] Reinstalar `/usr/local/bin/coletta-deploy` no servidor e conferir os cabeçalhos em produção
 
 ## Fase 7 — README (relatório técnico)
 - [ ] Visão geral, stack e arquitetura
