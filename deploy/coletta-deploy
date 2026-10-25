@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# /usr/local/bin/coletta-deploy  (dono root, modo 755: o usuário coletta executa, mas não altera)
+#
+# Único comando que a chave SSH do GitHub Actions pode executar (forced command no
+# authorized_keys do usuário coletta). O workflow envia o SHA do commit testado, que chega
+# aqui em SSH_ORIGINAL_COMMAND.
+set -euo pipefail
+
+APP_DIR=/srv/coletta/app
+SHA="${SSH_ORIGINAL_COMMAND:-}"
+
+if [[ ! "$SHA" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "Uso: informe o SHA completo do commit a publicar." >&2
+    exit 1
+fi
+
+cd "$APP_DIR"
+git fetch --quiet origin main
+# Só publica commits que já estão na main do GitHub
+if ! git merge-base --is-ancestor "$SHA" origin/main; then
+    echo "Commit $SHA não pertence à origin/main." >&2
+    exit 1
+fi
+# .env, .venv e staticfiles/ são ignorados pelo Git e não são tocados pelo reset
+git reset --hard --quiet "$SHA"
+
+export PATH="/srv/coletta/.local/bin:$PATH"
+uv pip sync --quiet requirements.txt
+
+.venv/bin/python manage.py migrate --noinput
+.venv/bin/python manage.py collectstatic --noinput --verbosity 0
+.venv/bin/python manage.py check --deploy --fail-level ERROR
+
+sudo /usr/bin/systemctl restart coletta.service
+echo "Deploy concluído: $(git rev-parse --short HEAD)"
