@@ -86,12 +86,14 @@ pelo deploy automático. Assim, problemas de infraestrutura aparecem com tempo p
 - [ ] Reinstalar `/usr/local/bin/coletta-deploy` no servidor e conferir os cabeçalhos em produção
 
 ## Fase 7 — README (relatório técnico)
-- [ ] Visão geral, stack e arquitetura
-- [ ] Passo a passo da infraestrutura (VM, SSH, firewall, Fail2Ban, Nginx, Certbot, PQC)
-- [ ] Evidências: SSL.org, DigiCert, Fail2Ban, pipeline verde
-- [ ] OWASP Top 10:2025: categorias mitigadas, com arquivo e trecho de código de cada uma
-- [ ] Demonstração do teste de acesso cruzado (404)
-- [ ] Como rodar localmente
+- [x] Visão geral, stack e arquitetura
+- [x] Passo a passo da infraestrutura (VM, SSH, firewall, Fail2Ban, Nginx, Certbot, PQC)
+- [x] OWASP Top 10:2025: categorias mitigadas, com arquivo e linha de cada uma
+- [x] Demonstração do teste de acesso cruzado (404)
+- [x] Como rodar localmente
+- [ ] Salvar as capturas em `docs/evidencias/` (ssl-org.png, ssl-org-cadeia.png, digicert-pqc.png,
+      fail2ban-ban.png, pipeline.png, tela-login.png, tela-inicio.png)
+- [ ] Confirmar 2FA ativo na conta do GitHub (o README afirma)
 
 ## Fase 8 — Visual e extras
 - [ ] Ajuste visual fiel ao protótipo do Figma

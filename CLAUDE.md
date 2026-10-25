@@ -173,7 +173,11 @@ Já feito:
   `500.html` e `403_csrf.html` (base `error_base.html`). CI roda os testes com `DEBUG=True` (senão o
   redirect HTTPS quebraria o cliente de testes) e o `check --deploy` com `--fail-level WARNING`.
 
-Próximo passo: Fase 7 (README como relatório técnico).
+- **Fase 7:** `README.md` escrito como relatório técnico, com links `arquivo#Lnn` para cada mitigação da
+  OWASP. **Se mudar código citado no README, conferir os números de linha.** Evidências em
+  `docs/evidencias/` (a usuária salva as capturas).
+
+Próximo passo: capturas em `docs/evidencias/`; depois Fase 8 (ajuste visual conforme o Figma).
 
 ### Estrutura esperada
 ```
