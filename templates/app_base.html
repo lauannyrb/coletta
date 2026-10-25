@@ -7,13 +7,18 @@
   <aside class="sidebar">
     {% include "partials/logo.html" %}
 
+    {% with url_name=request.resolver_match.url_name %}
     <nav class="sidebar-nav" aria-label="Navegação principal">
-      {% url 'home' as home_url %}
-      <a href="{{ home_url }}"{% if request.path == home_url %} aria-current="page"{% endif %}>
+      <a href="{% url 'home' %}"{% if url_name == 'home' %} aria-current="page"{% endif %}>
         {% include "partials/icon.html" with name="grid" %}
         Início
       </a>
+      <a href="{% url 'collection_list' %}"{% if 'collection' in url_name or 'item' in url_name %} aria-current="page"{% endif %}>
+        {% include "partials/icon.html" with name="archive" %}
+        Minhas coleções
+      </a>
     </nav>
+    {% endwith %}
 
     <div class="sidebar-user">
       <div class="sidebar-user-info">
@@ -31,9 +36,20 @@
     </div>
   </aside>
 
-  <main class="app-main">
-    {% include "partials/messages.html" %}
-    {% block content %}{% endblock %}
-  </main>
+  <div class="app-content">
+    <header class="topbar">
+      <form class="search-form" method="get" action="{% url 'search' %}" role="search">
+        <label class="visually-hidden" for="busca-global">Buscar coleções ou itens</label>
+        {% include "partials/icon.html" with name="search" %}
+        <input id="busca-global" type="search" name="q" value="{{ query|default:'' }}" maxlength="100"
+               placeholder="Buscar coleções ou itens…" autocomplete="off">
+      </form>
+    </header>
+
+    <main class="app-main">
+      {% include "partials/messages.html" %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
 </div>
 {% endblock %}

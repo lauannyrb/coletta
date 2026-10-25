@@ -3,16 +3,70 @@
 {% block title %}Início{% endblock %}
 
 {% block content %}
-<header class="page-header">
-  <p class="eyebrow">Painel do acervo</p>
-  <h1>Olá, {{ user.name }}! Vamos organizar suas coleções?</h1>
-  <p class="page-subtitle">Aqui vai aparecer o resumo do seu acervo pessoal.</p>
+<header class="page-header page-header--actions">
+  <div>
+    <p class="eyebrow">Painel do acervo</p>
+    <h1>Olá, {{ user.name }}! Vamos organizar suas coleções?</h1>
+    <p class="page-subtitle">Aqui está o resumo do seu acervo pessoal.</p>
+  </div>
+  <a class="btn btn-primary" href="{% url 'collection_create' %}">
+    {% include "partials/icon.html" with name="plus" %}
+    Criar coleção
+  </a>
 </header>
 
-{# Provisório (Fase 1): totais, recentes e CRUD de coleções entram na Fase 4 #}
-<section class="empty-state">
-  <span class="empty-state-icon">{% include "partials/icon.html" with name="folder" %}</span>
-  <h2>Seu acervo ainda está vazio</h2>
-  <p>Em breve você poderá criar sua primeira coleção por aqui.</p>
+<section class="stats" aria-label="Resumo do acervo">
+  <div class="stat-card">
+    <div>
+      <p class="stat-label">Total de coleções</p>
+      <p class="stat-value">{{ total_collections }}</p>
+    </div>
+    <span class="stat-icon">{% include "partials/icon.html" with name="folder" %}</span>
+  </div>
+  <div class="stat-card">
+    <div>
+      <p class="stat-label">Itens cadastrados</p>
+      <p class="stat-value">{{ total_items }}</p>
+    </div>
+    <span class="stat-icon">{% include "partials/icon.html" with name="sparkles" %}</span>
+  </div>
+  <div class="stat-card">
+    <div>
+      <p class="stat-label">Última atualização</p>
+      <p class="stat-value stat-value--sm">
+        {% if last_update %}{{ last_update|date:"d/m/Y, H:i" }}{% else %}—{% endif %}
+      </p>
+    </div>
+    <span class="stat-icon">{% include "partials/icon.html" with name="clock" %}</span>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-header">
+    <h2>Suas coleções recentes</h2>
+    {% if recent_collections %}
+      <a class="link-arrow" href="{% url 'collection_list' %}">
+        Ver todas as coleções {% include "partials/icon.html" with name="arrow-right" %}
+      </a>
+    {% endif %}
+  </div>
+
+  {% if recent_collections %}
+    <div class="collection-grid">
+      {% for collection in recent_collections %}
+        {% include "partials/collection_card.html" %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <span class="empty-state-icon">{% include "partials/icon.html" with name="folder" %}</span>
+      <h2>Seu acervo ainda está vazio</h2>
+      <p>Crie sua primeira coleção para começar a catalogar o que você guarda.</p>
+      <a class="btn btn-primary" href="{% url 'collection_create' %}">
+        {% include "partials/icon.html" with name="plus" %}
+        Criar minha primeira coleção
+      </a>
+    </div>
+  {% endif %}
 </section>
 {% endblock %}

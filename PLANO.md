@@ -32,55 +32,54 @@ pelo deploy automático. Assim, problemas de infraestrutura aparecem com tempo p
 ## Fase 2 — Servidor (cedo, para dar tempo de errar)
 - [x] Escolher provedor e distro: Oracle Cloud (Always Free) + Ubuntu Server LTS
 - [x] Criar VM free tier
-- [ ] Usuário próprio para a aplicação (não root)
+- [x] Usuário próprio para a aplicação (não root)
 - [x] SSH só com chave: `PasswordAuthentication no`, `PermitRootLogin no`
 - [x] Firewall / Security Group: somente 22, 80, 443 (Security List da OCI + `/etc/iptables/rules.v4`)
 - [x] Fail2Ban no sshd: `maxretry = 4`, `bantime = 24h`
 - [x] Filtro do Fail2Ban em `mode = aggressive` (o `normal` não contava as tentativas dos robôs)
-- [ ] **Teste 2 do Fail2Ban (lembrar a usuária):** de OUTRO IP (celular no 4G), 5× `ssh naoexiste@IP`;
-      print do `fail2ban-client status sshd` com o IP banido; depois `fail2ban-client set sshd unbanip <IP>`.
-      Nunca testar do IP de casa (ban de 24h)
-- [ ] uv + Python 3.14; clonar o projeto; `.env` de produção com `SECRET_KEY` própria
-- [ ] `db.sqlite3` de produção fora da pasta sobrescrita pelo deploy
-- [ ] Gunicorn como serviço systemd (socket Unix)
-- [ ] Nginx: proxy reverso + `staticfiles/`; `proxy_set_header X-Real-IP $remote_addr` e
+- [x] Teste 2 do Fail2Ban (2026-10-25): celular em dados móveis banido (`177.58.26.39`); no modo
+      aggressive uma tentativa gera ~2 falhas no log, então o ban vem por volta da 2ª tentativa
+- [x] uv + Python 3.14; clonar o projeto; `.env` de produção com `SECRET_KEY` própria
+- [x] `db.sqlite3` de produção fora da pasta sobrescrita pelo deploy
+- [x] Gunicorn como serviço systemd (socket Unix)
+- [x] Nginx: proxy reverso + `staticfiles/`; `proxy_set_header X-Real-IP $remote_addr` e
       `BEHIND_PROXY=True` no `.env` (IP real para o django-axes e o rate limit)
-- [ ] Certbot 5.4+ com certificado para o IP (perfil `shortlived`, ~6 dias); timer de renovação ativo;
+- [x] Certbot 5.4+ com certificado para o IP (perfil `shortlived`, ~6 dias); timer de renovação ativo;
       `certbot renew --dry-run`
-- [ ] Redirect 80 → 443; TLS 1.2/1.3; HSTS
-- [ ] PQC: `openssl version` ≥ 3.5; `ssl_ecdh_curve` com `X25519MLKEM768` primeiro
-- [ ] Validar: SSL.org (certificado confiável, assinatura e chave aceitáveis) e DigiCert PQC checker
+- [x] Redirect 80 → 443; TLS 1.2/1.3; HSTS
+- [x] PQC: `openssl version` ≥ 3.5; `ssl_ecdh_curve` com `X25519MLKEM768` primeiro
+- [x] Validar: SSL.org (Trusted: Yes; Good signature · Good key; TLS 1.2/1.3) e DigiCert PQC checker (Pass)
 - [ ] Guardar prints das evidências para o README
 
 ## Fase 3 — CI/CD
-- [ ] Usuário de deploy com `sudo` restrito a reiniciar o serviço do Gunicorn
-- [ ] Secrets no GitHub: `SSH_PRIVATE_KEY`, `SSH_HOST`, `SSH_USER`, `SSH_KNOWN_HOSTS`
-- [ ] `.github/workflows/deploy.yml`, job de checks: uv + Python 3.14, dependências, `check --deploy`,
+- [x] Usuário de deploy com `sudo` restrito a reiniciar o serviço do Gunicorn
+- [x] Secrets no GitHub: `SSH_PRIVATE_KEY`, `SSH_HOST`, `SSH_USER`, `SSH_KNOWN_HOSTS`
+- [x] `.github/workflows/deploy.yml`, job de checks: uv + Python 3.14, dependências, `check --deploy`,
       `manage.py test`, `pip-audit`
-- [ ] Job de deploy (só se os checks passarem): atualizar código, dependências, `migrate`,
+- [x] Job de deploy (só se os checks passarem): atualizar código, dependências, `migrate`,
       `collectstatic --noinput`, reiniciar o Gunicorn
-- [ ] Testar com `git push origin main` e conferir a mudança no IP público
+- [x] Testar com `git push origin main` e conferir a mudança no IP público (pipeline verde em 2026-10-25)
 
 ## Fase 4 — Funcionalidades (já entregues pelo pipeline)
-- [ ] Tela inicial: boas-vindas, totais reais, coleções recentes, "nova coleção"
-- [ ] CRUD de coleções (cards, formulário, confirmação de exclusão avisando sobre os itens)
-- [ ] Detalhe da coleção + CRUD de itens
-- [ ] Busca (coleções e itens do usuário, `icontains`, estado "nenhum resultado")
-- [ ] Estados vazios e erros de formulário
-- [ ] Todas as consultas filtradas pelo dono (regras da seção 8 do `CLAUDE.md`)
+- [x] Tela inicial: boas-vindas, totais reais, coleções recentes, "nova coleção"
+- [x] CRUD de coleções (cards, formulário, confirmação de exclusão avisando sobre os itens)
+- [x] Detalhe da coleção + CRUD de itens
+- [x] Busca (coleções e itens do usuário, `icontains`, estado "nenhum resultado")
+- [x] Estados vazios e erros de formulário
+- [x] Todas as consultas filtradas pelo dono (regras da seção 8 do `CLAUDE.md`)
 
-## Fase 5 — Testes de isolamento
-- [ ] Usuário B não vê, edita nem exclui coleção de A (404)
-- [ ] Usuário B não vê nem modifica item de A (404)
-- [ ] Usuário B não cria item em coleção de A
-- [ ] Totais e busca consideram só o usuário atual
-- [ ] Validação de campos vazios, só com espaços e longos demais
+## Fase 5 — Testes de isolamento (feitos junto com a Fase 4, em `colecoes/tests.py`)
+- [x] Usuário B não vê, edita nem exclui coleção de A (404)
+- [x] Usuário B não vê nem modifica item de A (404)
+- [x] Usuário B não cria item em coleção de A
+- [x] Totais e busca consideram só o usuário atual
+- [x] Validação de campos vazios, só com espaços e longos demais
 
 ## Fase 6 — Endurecimento de produção
 - [ ] Cookies `Secure`/`HttpOnly`, `SECURE_PROXY_SSL_HEADER`, `CSRF_TRUSTED_ORIGINS`
 - [ ] HSTS, `nosniff`, `X_FRAME_OPTIONS = "DENY"`, CSP restrita a `'self'`
 - [ ] Logging de falhas de login (django-axes + logging do Django)
-- [ ] `check --deploy` sem avisos relevantes
+- [ ] `check --deploy` sem avisos relevantes; depois trocar para `--fail-level WARNING` no workflow e no `deploy/coletta-deploy`
 
 ## Fase 7 — README (relatório técnico)
 - [ ] Visão geral, stack e arquitetura

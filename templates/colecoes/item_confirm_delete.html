@@ -1,0 +1,24 @@
+{% extends "app_base.html" %}
+
+{% block title %}Excluir item{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{% url 'collection_detail' collection.pk %}">
+  {% include "partials/icon.html" with name="arrow-left" %}
+  {{ collection.name }}
+</a>
+
+<section class="confirm-card">
+  <span class="confirm-icon">{% include "partials/icon.html" with name="trash" %}</span>
+  <h1>Excluir o item “{{ item.name }}”?</h1>
+  <p class="page-subtitle">Ele será removido da coleção “{{ collection.name }}”. Esta ação não pode ser desfeita.</p>
+  <form method="post" class="form-actions">
+    {% csrf_token %}
+    <a class="btn btn-secondary" href="{% url 'collection_detail' collection.pk %}">Cancelar</a>
+    <button type="submit" class="btn btn-danger">
+      {% include "partials/icon.html" with name="trash" %}
+      Excluir item
+    </button>
+  </form>
+</section>
+{% endblock %}

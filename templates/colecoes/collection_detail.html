@@ -1,0 +1,64 @@
+{% extends "app_base.html" %}
+{% load colecoes_extras %}
+
+{% block title %}{{ collection.name }}{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{% url 'collection_list' %}">
+  {% include "partials/icon.html" with name="arrow-left" %}
+  Minhas coleções
+</a>
+
+<header class="page-header page-header--actions">
+  <div>
+    <p class="eyebrow">Coleção</p>
+    <h1>{{ collection.name }}</h1>
+    {% if collection.description %}<p class="page-subtitle">{{ collection.description|linebreaksbr }}</p>{% endif %}
+    <p class="meta">
+      {{ items|length }} {{ items|length|pluralize:"item,itens" }} · atualizada {{ collection.updated_at|ha_quanto_tempo }}
+    </p>
+  </div>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="{% url 'collection_update' collection.pk %}">
+      {% include "partials/icon.html" with name="edit" %} Editar
+    </a>
+    <a class="btn btn-danger-outline" href="{% url 'collection_delete' collection.pk %}">
+      {% include "partials/icon.html" with name="trash" %} Excluir
+    </a>
+    <a class="btn btn-primary" href="{% url 'item_create' collection.pk %}">
+      {% include "partials/icon.html" with name="plus" %} Adicionar item
+    </a>
+  </div>
+</header>
+
+{% if items %}
+  <ul class="item-list">
+    {% for item in items %}
+    <li class="item-row">
+      <div class="item-main">
+        <h3>{{ item.name }}</h3>
+        {% if item.category %}<span class="badge">{{ item.category }}</span>{% endif %}
+        {% if item.description %}<p>{{ item.description|linebreaksbr }}</p>{% endif %}
+      </div>
+      <div class="card-actions">
+        <a class="icon-btn" href="{% url 'item_update' item.pk %}" aria-label="Editar {{ item.name }}" title="Editar">
+          {% include "partials/icon.html" with name="edit" %}
+        </a>
+        <a class="icon-btn icon-btn--danger" href="{% url 'item_delete' item.pk %}" aria-label="Excluir {{ item.name }}" title="Excluir">
+          {% include "partials/icon.html" with name="trash" %}
+        </a>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <div class="empty-state">
+    <span class="empty-state-icon">{% include "partials/icon.html" with name="sparkles" %}</span>
+    <h2>Esta coleção ainda não tem itens</h2>
+    <p>Adicione o primeiro item para começar o catálogo.</p>
+    <a class="btn btn-primary" href="{% url 'item_create' collection.pk %}">
+      {% include "partials/icon.html" with name="plus" %} Adicionar item
+    </a>
+  </div>
+{% endif %}
+{% endblock %}

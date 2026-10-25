@@ -1,0 +1,37 @@
+{% extends "app_base.html" %}
+
+{% block title %}Minhas coleções{% endblock %}
+
+{% block content %}
+<header class="page-header page-header--actions">
+  <div>
+    <p class="eyebrow">Acervo</p>
+    <h1>Minhas coleções</h1>
+    <p class="page-subtitle">
+      {% if collections %}{{ collections|length }} {{ collections|length|pluralize:"coleção,coleções" }} no seu acervo.{% else %}Nenhuma coleção ainda.{% endif %}
+    </p>
+  </div>
+  <a class="btn btn-primary" href="{% url 'collection_create' %}">
+    {% include "partials/icon.html" with name="plus" %}
+    Nova coleção
+  </a>
+</header>
+
+{% if collections %}
+  <div class="collection-grid">
+    {% for collection in collections %}
+      {% include "partials/collection_card.html" with show_actions=True %}
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-state">
+    <span class="empty-state-icon">{% include "partials/icon.html" with name="folder" %}</span>
+    <h2>Você ainda não tem coleções</h2>
+    <p>Discos, câmeras, bonecas, álbuns... crie uma coleção para organizar seus itens.</p>
+    <a class="btn btn-primary" href="{% url 'collection_create' %}">
+      {% include "partials/icon.html" with name="plus" %}
+      Criar minha primeira coleção
+    </a>
+  </div>
+{% endif %}
+{% endblock %}

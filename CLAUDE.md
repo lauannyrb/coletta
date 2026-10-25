@@ -137,7 +137,35 @@ Já feito:
   - IP do cliente via `accounts.utils.get_client_ip`: usa `X-Real-IP` só com `BEHIND_PROXY=True`.
   - 16 testes em `accounts/tests.py`.
 
-Próximo passo: Fase 2 (servidor). Repositório no GitHub ainda pendente (a usuária faz o push).
+- **Fase 2 (servidor) quase concluída:** app no ar em https://137.131.137.14 (usuário `coletta`, código em
+  `/srv/coletta/app`, banco/cache em `/var/lib/coletta`, Gunicorn via `coletta.socket`/`coletta.service`,
+  Nginx com `deploy/nginx/coletta.conf`). Certbot 5.8 (snap), certificado ECDSA de 6 dias com
+  `renew_hook = systemctl reload nginx`. PQC confirmado: `Negotiated TLS1.3 group: X25519MLKEM768`.
+  Fail2Ban em `mode = aggressive`.
+
+  Validado em 2026-10-25: SSL.org (Trusted: Yes; sha384 / EC 256 · Good signature · Good key; só TLS 1.2 e
+  1.3; cadeia completa) e DigiCert PQC checker (Pass: TLS 1.3 + quantum-safe key exchange).
+
+  Fail2Ban testado de outro IP (celular): banido. No modo aggressive uma tentativa de SSH gera ~2 linhas de
+  falha, então o ban ocorre por volta da 2ª tentativa (maxretry continua 4) — explicar no README.
+
+- **Fase 3 (CI/CD) concluída:** `.github/workflows/deploy.yml` (checks → deploy → `curl` no site), Actions
+  fixadas por SHA. Deploy por SSH como `coletta` com chave restrita no `authorized_keys`
+  (`restrict,command="/usr/local/bin/coletta-deploy"`): o workflow envia o SHA, o script só aceita commits
+  da `origin/main`. `sudo` do `coletta` limitado a `systemctl restart coletta.service`
+  (`/etc/sudoers.d/coletta-deploy`). `/usr/local/bin/coletta-deploy` é cópia de `deploy/coletta-deploy`
+  feita à mão: **se o script mudar no repositório, reinstalar no servidor** (`sudo install -o root -g root
+  -m 755 ...`).
+
+- **Fases 4 e 5 concluídas:** rotas em `colecoes/urls.py` (`/colecoes/`, `/colecoes/nova/`,
+  `/colecoes/<pk>/`, `.../editar/`, `.../excluir/`, `/colecoes/<pk>/itens/novo/`, `/itens/<pk>/editar/`,
+  `/itens/<pk>/excluir/`, `/busca/?q=`). Views em funções com `@login_required`; helpers
+  `_get_own_collection` / `_get_own_item` fazem o `get_object_or_404` filtrado pelo dono. Exclusão: GET mostra
+  a confirmação, só POST exclui. Mudança em item atualiza `collection.updated_at` (`_touch`). Filtro de
+  template `ha_quanto_tempo` (`colecoes/templatetags/colecoes_extras.py`). 41 testes (16 de autenticação +
+  25 de CRUD, totais, busca e isolamento com 404).
+
+Próximo passo: Fase 6 (endurecimento de produção: cookies seguros, CSP, logging, `check --deploy` limpo).
 
 ### Estrutura esperada
 ```

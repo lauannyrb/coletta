@@ -1,0 +1,57 @@
+{% extends "app_base.html" %}
+
+{% block title %}Busca{% endblock %}
+
+{% block content %}
+<header class="page-header">
+  <p class="eyebrow">Busca</p>
+  {% if query %}
+    <h1>Resultados para “{{ query }}”</h1>
+  {% else %}
+    <h1>Buscar no acervo</h1>
+    <p class="page-subtitle">Digite o nome de uma coleção ou de um item na barra de busca acima.</p>
+  {% endif %}
+</header>
+
+{% if query %}
+  {% if not collections and not items %}
+    <div class="empty-state">
+      <span class="empty-state-icon">{% include "partials/icon.html" with name="search" %}</span>
+      <h2>Nenhum resultado encontrado</h2>
+      <p>Não há coleções nem itens com “{{ query }}” no nome. Confira a grafia ou tente outro termo.</p>
+    </div>
+  {% else %}
+    {% if collections %}
+    <section class="section">
+      <div class="section-header">
+        <h2>Coleções <span class="badge">{{ collections|length }}</span></h2>
+      </div>
+      <div class="collection-grid">
+        {% for collection in collections %}
+          {% include "partials/collection_card.html" %}
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if items %}
+    <section class="section">
+      <div class="section-header">
+        <h2>Itens <span class="badge">{{ items|length }}</span></h2>
+      </div>
+      <ul class="item-list">
+        {% for item in items %}
+        <li class="item-row">
+          <div class="item-main">
+            <h3><a href="{% url 'collection_detail' item.collection.pk %}">{{ item.name }}</a></h3>
+            {% if item.category %}<span class="badge">{{ item.category }}</span>{% endif %}
+            <p class="meta">em {{ item.collection.name }}</p>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+  {% endif %}
+{% endif %}
+{% endblock %}
