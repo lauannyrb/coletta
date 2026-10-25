@@ -180,8 +180,11 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+# O Coletta não envia e-mails na v1 (sem recuperação de senha). Em desenvolvimento, qualquer e-mail
+# vai para o console; em produção nenhum mailer é configurado (o console reprova no check --deploy).
+if DEBUG:
+    MAILERS = {
+        'default': {
+            'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+        },
+    }
