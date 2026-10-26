@@ -209,7 +209,15 @@ Já feito:
 - **Prévia da capa** (pedido da usuária): a área tracejada do formulário de coleção é o `<label>` do campo
   de arquivo (input visualmente oculto, classe `cover-input`); `static/js/capa.js` mostra a prévia via
   `URL.createObjectURL` e avisa formato/tamanho (o servidor valida de novo). Por isso a CSP tem
-  `img-src 'self' blob:` (só imagens). 77 testes.
+  `img-src 'self' blob:` (só imagens).
+- **Validação antes do envio** (`static/js/validacao.js`, formulários com `data-validate`): impede o envio
+  com obrigatório vazio (o navegador não reenvia arquivos, então a capa se perderia); mensagens no mesmo
+  visual do Django, ícone vindo de `<template id="icone-alerta">`. Se o servidor recusar com imagem enviada,
+  o card avisa para escolher de novo (`form.cover_was_sent`). Categoria da coleção nova começa vazia
+  ("Selecione uma categoria"), senão o padrão `outros` passava sem escolha.
+- **Seed de demonstração:** `manage.py seed_demo [--reset]` (só com `DEBUG=True`; senhas aleatórias
+  mostradas no terminal; contas `@demo.coletta.local`: Ana com 7 coleções/29 itens/capas e Bia com 1
+  coleção para o teste de 404). 81 testes.
 
 Próximo passo: publicar (migração 0003 renomeia `category` → `edition` preservando dados); capturas em
 `docs/evidencias/`.

@@ -68,6 +68,8 @@ pelo deploy automático. Assim, problemas de infraestrutura aparecem com tempo p
 - [x] Busca em tempo real (sugestões enquanto digita, `static/js/busca.js` + `?parcial=1`)
 - [x] Filtros com aplicação automática e chips removíveis; exclusão em modal (`<dialog>` + POST com CSRF)
 - [x] Prévia da capa ao escolher a imagem (`static/js/capa.js`, CSP `img-src blob:`)
+- [x] Validação antes do envio (mantém a capa escolhida), categoria obrigatória de fato
+- [x] Seed de demonstração (`manage.py seed_demo`, só em desenvolvimento)
 - [x] Estados vazios e erros de formulário
 - [x] Todas as consultas filtradas pelo dono (regras da seção 8 do `CLAUDE.md`)
 

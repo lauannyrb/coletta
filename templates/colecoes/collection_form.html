@@ -22,7 +22,7 @@
   <p class="page-subtitle">Dê um espaço dedicado para reunir e catalogar seus objetos favoritos com carinho, contexto e detalhes.</p>
 </header>
 
-<form method="post" class="layout-2col" enctype="multipart/form-data" novalidate>
+<form method="post" class="layout-2col" enctype="multipart/form-data" novalidate data-validate>
   {% csrf_token %}
   <div class="form form-card">
     {% include "partials/form_errors.html" %}
@@ -70,6 +70,9 @@
           <button type="button" class="btn btn-ghost btn-sm" data-cover-clear>{% include "partials/icon.html" with name="x" %} Desfazer</button>
         </p>
         <p class="cover-warning" data-cover-warning role="alert" hidden></p>
+        {% if form.cover_was_sent and form.errors and not form.cover.errors %}
+          <p class="cover-warning">A imagem não foi salva porque o formulário tinha erros. Escolha-a de novo antes de salvar.</p>
+        {% endif %}
         {% if form.cover.errors %}
         <ul class="field-errors" id="{{ form.cover.auto_id }}_error">
           {% for error in form.cover.errors %}<li>{% include "partials/icon.html" with name="alert" %}{{ error }}</li>{% endfor %}

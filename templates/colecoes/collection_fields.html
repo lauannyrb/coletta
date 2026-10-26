@@ -51,7 +51,7 @@
   </section>
 
   <aside class="side-column">
-    <form method="post" class="form side-card" novalidate>
+    <form method="post" class="form side-card" novalidate data-validate>
       {% csrf_token %}
       <h2>Novo campo</h2>
       {% include "partials/form_errors.html" %}

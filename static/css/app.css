@@ -940,7 +940,9 @@ a:hover { color: var(--color-primary-dark); }
   align-items: start;
 }
 .layout-2col .form-card { max-width: none; }
-.side-column, .stack { display: grid; gap: 20px; }
+/* Sem isto, um conteúdo largo (ex.: nome de arquivo comprido) alargaria a coluna */
+.layout-2col > * { min-width: 0; }
+.side-column, .stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
 
 .side-card {
   display: grid;
@@ -992,7 +994,7 @@ a:hover { color: var(--color-primary-dark); }
 .cover-placeholder .icon { width: 32px; height: 32px; }
 
 /* Área da capa: rótulo clicável do campo de arquivo, com prévia (static/js/capa.js) */
-.cover-field { display: grid; gap: 10px; }
+.cover-field { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
 .cover-field [hidden] { display: none; }
 .cover-input {
   position: absolute;
@@ -1060,7 +1062,7 @@ a:hover { color: var(--color-primary-dark); }
   font-size: 0.8125rem;
   color: var(--color-text-muted);
 }
-.cover-file span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cover-file span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cover-file .btn { min-height: 30px; flex-shrink: 0; }
 .cover-warning {
   margin: 0;
@@ -1073,7 +1075,7 @@ a:hover { color: var(--color-primary-dark); }
 }
 
 /* Formulários */
-.form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
 .field select {
   width: 100%;
   min-height: 48px;

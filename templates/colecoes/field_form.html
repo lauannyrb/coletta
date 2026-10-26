@@ -17,7 +17,7 @@
   <p class="page-subtitle">Os valores já preenchidos nos itens são mantidos. O tipo não pode ser alterado.</p>
 </header>
 
-<form method="post" class="form form-card form-card--narrow" novalidate>
+<form method="post" class="form form-card form-card--narrow" novalidate data-validate>
   {% csrf_token %}
   {% include "partials/form_errors.html" %}
   {% include "partials/field.html" with field=form.name %}

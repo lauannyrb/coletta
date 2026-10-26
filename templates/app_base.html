@@ -78,7 +78,10 @@
     </div>
   </form>
 </dialog>
+{# Ícone usado pelas mensagens de erro geradas no navegador (static/js/validacao.js) #}
+<template id="icone-alerta">{% include "partials/icon.html" with name="alert" %}</template>
 <script src="{% static 'js/busca.js' %}" defer></script>
+<script src="{% static 'js/validacao.js' %}" defer></script>
 <script src="{% static 'js/confirmar.js' %}" defer></script>
 {% block scripts %}{% endblock %}
 {% endblock %}

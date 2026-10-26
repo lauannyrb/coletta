@@ -64,7 +64,7 @@ componentes do *brand guide*).
 |---|---|
 | Linguagem | Python 3.14 (gerenciado com [uv](https://docs.astral.sh/uv/)) |
 | Framework | Django 6.1 (templates renderizados no servidor) |
-| Front-end | HTML + CSS puro; quatro scripts próprios e pequenos em `static/js/` (busca em tempo real, filtros automáticos, modal de exclusão e prévia da capa), todos opcionais (sem JS tudo funciona); nada de CDN |
+| Front-end | HTML + CSS puro; cinco scripts próprios e pequenos em `static/js/` (busca em tempo real, filtros automáticos, modal de exclusão, prévia da capa e validação antes do envio), todos opcionais (sem JS tudo funciona); nada de CDN |
 | Banco de dados | SQLite |
 | Limite de tentativas de login | django-axes 8.3 |
 | Processamento das capas | Pillow 13.0 |
@@ -180,13 +180,24 @@ No `.env`, gere uma `SECRET_KEY` própria e, para desenvolvimento, use `DEBUG=Tr
 .venv/bin/python -c "from django.core.management.utils import get_random_secret_key as g; print(g())"
 ```
 
-Testes (77 testes automatizados):
+Testes (81 testes automatizados):
 
 ```bash
 .venv/bin/python manage.py test
 ```
 
-Não existe usuário padrão nem seed com senha fixa: o primeiro acesso é feito pela tela de cadastro.
+Não existe usuário padrão nem senha fixa no código: o primeiro acesso é feito pela tela de cadastro.
+
+**Acervo de demonstração (opcional, só em desenvolvimento):**
+
+```bash
+.venv/bin/python manage.py seed_demo          # cria a Ana (7 coleções, 29 itens, capas) e a Bia
+.venv/bin/python manage.py seed_demo --reset  # apaga as contas de demonstração e recria tudo
+```
+
+O comando ([`colecoes/management/commands/seed_demo.py`](colecoes/management/commands/seed_demo.py)) **recusa rodar com `DEBUG=False`**,
+então nunca cria contas em produção. As senhas são **aleatórias**, geradas a cada execução e mostradas
+só no terminal. A Bia tem uma coleção própria, usada para demonstrar o teste de isolamento (a Ana recebe 404).
 
 ## 5. Segurança da aplicação (OWASP Top 10:2025)
 
@@ -224,7 +235,7 @@ O principal risco de um sistema multiusuário é um usuário acessar dados de ou
   registro existe.
 - **Campos personalizados** seguem a mesma regra: são buscados pela coleção do dono
   ([`colecoes/views.py#L46`](colecoes/views.py#L46)), e o formulário do item só monta os campos da coleção
-  do próprio item ([`colecoes/forms.py#L126`](colecoes/forms.py#L126)). Um ID de campo de outra coleção
+  do próprio item ([`colecoes/forms.py#L132`](colecoes/forms.py#L132)). Um ID de campo de outra coleção
   enviado no POST é simplesmente ignorado (testado em
   [`colecoes/tests.py#L519`](colecoes/tests.py#L519)).
 - Exclusões só acontecem por POST (o GET apenas mostra a confirmação).
@@ -469,7 +480,7 @@ flowchart TD
 
     subgraph CI["Job 1 · Testes e verificações"]
         B["Python 3.14 + dependências<br/>(uv)"] --> C["check --deploy<br/>qualquer aviso reprova"]
-        C --> T["77 testes automatizados"]
+        C --> T["81 testes automatizados"]
         T --> P["pip-audit<br/>vulnerabilidade conhecida reprova"]
     end
 

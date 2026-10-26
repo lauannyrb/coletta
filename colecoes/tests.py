@@ -635,3 +635,58 @@ class DeleteModalTests(BaseTestCase):
         self.assertContains(response, 'Vinis &lt;b&gt;raros&lt;/b&gt;')
         self.assertContains(response, '<dialog class="modal" id="modal-excluir"')
         self.assertContains(response, 'name="csrfmiddlewaretoken"')
+
+
+class CollectionFormRequiredTests(BaseTestCase):
+    def test_categoria_comeca_vazia_e_e_obrigatoria(self):
+        response = self.client.get(reverse('collection_create'))
+        self.assertContains(response, '<option value="" selected>Selecione uma categoria</option>', html=True)
+
+        response = self.client.post(reverse('collection_create'), {'name': 'Só o nome'})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('category', response.context['form'].errors)
+        self.assertFalse(Collection.objects.exists())
+
+    def test_avisa_que_a_imagem_precisa_ser_escolhida_de_novo(self):
+        response = self.client.post(reverse('collection_create'), {
+            'name': 'Vinis', 'category': 'musica', 'tags': 'tag inválida!', 'cover': _image_file('capa.png'),
+        })
+        self.assertContains(response, 'A imagem não foi salva porque o formulário tinha erros')
+
+
+class SeedDemoTests(TestCase):
+    def run_seed(self, *args):
+        import shutil
+        import tempfile
+        from io import StringIO
+
+        from django.core.management import call_command
+        from django.test import override_settings
+
+        media = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, media, ignore_errors=True)
+        out = StringIO()
+        with override_settings(DEBUG=True, MEDIA_ROOT=media):
+            call_command('seed_demo', *args, stdout=out)
+        return out.getvalue()
+
+    def test_recusa_rodar_fora_do_modo_de_desenvolvimento(self):
+        from django.core.management import CommandError, call_command
+
+        with self.assertRaises(CommandError):
+            call_command('seed_demo')  # o executor de testes roda com DEBUG=False
+        self.assertFalse(get_user_model().objects.exists())
+
+    def test_cria_acervo_com_senhas_aleatorias_e_reset_nao_duplica(self):
+        output = self.run_seed()
+        ana = get_user_model().objects.get(email='ana@demo.coletta.local')
+        self.assertEqual(ana.collections.count(), 7)
+        self.assertTrue(CollectionItem.objects.filter(collection__user=ana).count() > 20)
+        self.assertTrue(ItemFieldValue.objects.exists())
+        # Senha aleatória, mostrada só no terminal, e funcionando
+        password = output.split('senha: ')[1].split()[0]
+        self.assertTrue(ana.check_password(password))
+
+        self.run_seed('--reset')
+        self.assertEqual(get_user_model().objects.count(), 2)
+        self.assertEqual(Collection.objects.filter(user__email='ana@demo.coletta.local').count(), 7)

@@ -68,6 +68,12 @@ class CollectionForm(forms.ModelForm):
         self._old_cover = self.instance.cover.name if self.instance.pk else ''
         if self.instance.pk:
             self.initial['tags'] = ', '.join(self.instance.tag_list)
+        else:
+            # Sem opção pré-selecionada: a categoria é obrigatória e precisa ser escolhida de fato
+            self.fields['category'].choices = [('', 'Selecione uma categoria')] + list(Collection.Category.choices)
+            self.initial['category'] = ''
+        # O navegador não reenvia arquivos: se o formulário voltar com erro, a imagem precisa ser escolhida de novo
+        self.cover_was_sent = bool(self.files.get('cover'))
 
     def clean_start_year(self):
         year = self.cleaned_data.get('start_year')
