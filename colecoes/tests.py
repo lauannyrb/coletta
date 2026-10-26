@@ -630,7 +630,7 @@ class DeleteModalTests(BaseTestCase):
         response = self.client.get(reverse('collection_detail', args=[vinis.pk]))
         # Sem JS o link continua levando à página de confirmação (GET não exclui nada)
         self.assertContains(response, f'href="{reverse("collection_delete", args=[vinis.pk])}" data-confirm=')
-        self.assertContains(response, '1 item será excluído junto com ela.')
+        self.assertContains(response, 'data-confirm-name="Vinis &lt;b&gt;raros&lt;/b&gt;" data-confirm-text="1 item será excluído junto com ela."')
         # Nome escapado dentro do atributo; o modal envia POST com token CSRF
         self.assertContains(response, 'Vinis &lt;b&gt;raros&lt;/b&gt;')
         self.assertContains(response, '<dialog class="modal" id="modal-excluir"')

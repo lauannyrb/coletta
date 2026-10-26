@@ -23,7 +23,7 @@
   </div>
   <div class="header-actions">
     <a class="btn btn-secondary" href="{% url 'item_update' item.pk %}">{% include "partials/icon.html" with name="edit" %} Editar</a>
-    <a class="btn btn-danger-outline" href="{% url 'item_delete' item.pk %}" data-confirm="Excluir o item “{{ item.name }}”?" data-confirm-text="Ele será removido da coleção “{{ item.collection.name }}”. Esta ação não pode ser desfeita." data-confirm-button="Excluir item">{% include "partials/icon.html" with name="trash" %} Excluir</a>
+    <a class="btn btn-danger-outline" href="{% url 'item_delete' item.pk %}" data-confirm="Excluir item" data-confirm-name="{{ item.name }}" data-confirm-text="Ele será removido da coleção “{{ item.collection.name }}” com todas as suas informações." data-confirm-button="Excluir item">{% include "partials/icon.html" with name="trash" %} Excluir</a>
   </div>
 </header>
 

@@ -63,19 +63,25 @@
 <dialog class="modal" id="modal-excluir" aria-labelledby="modal-excluir-titulo" aria-describedby="modal-excluir-texto">
   <form method="post" class="modal-card">
     {% csrf_token %}
-    <span class="confirm-icon">{% include "partials/icon.html" with name="trash" %}</span>
-    <h2 id="modal-excluir-titulo" data-modal-title></h2>
-    <div class="alert alert-error">
-      {% include "partials/icon.html" with name="alert" %}
+    <header class="modal-header">
+      <span class="modal-icon">{% include "partials/icon.html" with name="trash" %}</span>
+      <div class="modal-heading">
+        <p class="eyebrow" data-modal-label>Excluir</p>
+        <h2 id="modal-excluir-titulo" data-modal-title></h2>
+      </div>
+      <button type="button" class="icon-btn modal-close" data-modal-cancel aria-label="Fechar">{% include "partials/icon.html" with name="x" %}</button>
+    </header>
+    <div class="modal-body">
       <p id="modal-excluir-texto" data-modal-text></p>
+      <p class="modal-note">{% include "partials/icon.html" with name="alert" %} Esta ação não pode ser desfeita.</p>
     </div>
-    <div class="form-actions">
-      <button type="button" class="btn btn-secondary" data-modal-cancel>Cancelar</button>
+    <footer class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-modal-cancel data-modal-focus>Cancelar</button>
       <button type="submit" class="btn btn-danger">
         {% include "partials/icon.html" with name="trash" %}
         <span data-modal-button>Excluir</span>
       </button>
-    </div>
+    </footer>
   </form>
 </dialog>
 {# Ícone usado pelas mensagens de erro geradas no navegador (static/js/validacao.js) #}

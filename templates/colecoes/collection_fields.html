@@ -33,7 +33,7 @@
           </div>
           <span class="card-actions">
             <a class="icon-btn" href="{% url 'field_update' field.pk %}" aria-label="Renomear {{ field.name }}" title="Renomear">{% include "partials/icon.html" with name="edit" %}</a>
-            <a class="icon-btn icon-btn--danger" href="{% url 'field_delete' field.pk %}" data-confirm="Excluir o campo “{{ field.name }}”?" data-confirm-text="{% if field.filled %}{{ field.filled }} {{ field.filled|pluralize:"item tem,itens têm" }} este campo preenchido, e os valores serão apagados.{% else %}Nenhum item preencheu este campo ainda.{% endif %} Esta ação não pode ser desfeita." data-confirm-button="Excluir campo" aria-label="Excluir {{ field.name }}" title="Excluir">{% include "partials/icon.html" with name="trash" %}</a>
+            <a class="icon-btn icon-btn--danger" href="{% url 'field_delete' field.pk %}" data-confirm="Excluir campo" data-confirm-name="{{ field.name }}" data-confirm-text="{% if field.filled %}{{ field.filled }} {{ field.filled|pluralize:"item tem,itens têm" }} este campo preenchido, e os valores serão apagados.{% else %}Nenhum item preencheu este campo ainda.{% endif %}" data-confirm-button="Excluir campo" aria-label="Excluir {{ field.name }}" title="Excluir">{% include "partials/icon.html" with name="trash" %}</a>
           </span>
         </li>
         {% endfor %}

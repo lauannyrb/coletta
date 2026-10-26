@@ -36,7 +36,7 @@
     <a class="btn btn-secondary" href="{% url 'collection_fields' collection.pk %}">
       {% include "partials/icon.html" with name="sliders" %} Campos
     </a>
-    <a class="btn btn-danger-outline" href="{% url 'collection_delete' collection.pk %}" data-confirm="Excluir a coleção “{{ collection.name }}”?" data-confirm-text="{% if total_items %}{{ total_items }} {{ total_items|pluralize:"item será excluído,itens serão excluídos" }} junto com ela.{% else %}A coleção está vazia.{% endif %} Esta ação não pode ser desfeita." data-confirm-button="Excluir coleção e itens">
+    <a class="btn btn-danger-outline" href="{% url 'collection_delete' collection.pk %}" data-confirm="Excluir coleção" data-confirm-name="{{ collection.name }}" data-confirm-text="{% if total_items %}{{ total_items }} {{ total_items|pluralize:"item será excluído,itens serão excluídos" }} junto com ela.{% else %}A coleção está vazia, nenhum item será afetado.{% endif %}" data-confirm-button="Excluir coleção e itens">
       {% include "partials/icon.html" with name="trash" %} Excluir
     </a>
     <a class="btn btn-primary" href="{% url 'item_create' collection.pk %}">
@@ -127,7 +127,7 @@
             <span class="meta">{% include "partials/icon.html" with name="clock" %} {{ item.updated_at|ha_quanto_tempo }}</span>
             <span class="card-actions">
               <a class="icon-btn" href="{% url 'item_update' item.pk %}" aria-label="Editar {{ item.name }}" title="Editar">{% include "partials/icon.html" with name="edit" %}</a>
-              <a class="icon-btn icon-btn--danger" href="{% url 'item_delete' item.pk %}" data-confirm="Excluir o item “{{ item.name }}”?" data-confirm-text="Ele será removido da coleção “{{ collection.name }}”. Esta ação não pode ser desfeita." data-confirm-button="Excluir item" aria-label="Excluir {{ item.name }}" title="Excluir">{% include "partials/icon.html" with name="trash" %}</a>
+              <a class="icon-btn icon-btn--danger" href="{% url 'item_delete' item.pk %}" data-confirm="Excluir item" data-confirm-name="{{ item.name }}" data-confirm-text="Ele será removido da coleção “{{ collection.name }}” com todas as suas informações." data-confirm-button="Excluir item" aria-label="Excluir {{ item.name }}" title="Excluir">{% include "partials/icon.html" with name="trash" %}</a>
             </span>
           </footer>
         </li>

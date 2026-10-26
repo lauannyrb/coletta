@@ -32,7 +32,7 @@
       <a class="icon-btn" href="{% url 'collection_update' collection.pk %}" aria-label="Editar {{ collection.name }}" title="Editar">
         {% include "partials/icon.html" with name="edit" %}
       </a>
-      <a class="icon-btn icon-btn--danger" href="{% url 'collection_delete' collection.pk %}" data-confirm="Excluir a coleção “{{ collection.name }}”?" data-confirm-text="{% if collection.item_count %}{{ collection.item_count }} {{ collection.item_count|pluralize:"item será excluído,itens serão excluídos" }} junto com ela.{% else %}A coleção está vazia.{% endif %} Esta ação não pode ser desfeita." data-confirm-button="Excluir coleção e itens" aria-label="Excluir {{ collection.name }}" title="Excluir">
+      <a class="icon-btn icon-btn--danger" href="{% url 'collection_delete' collection.pk %}" data-confirm="Excluir coleção" data-confirm-name="{{ collection.name }}" data-confirm-text="{% if collection.item_count %}{{ collection.item_count }} {{ collection.item_count|pluralize:"item será excluído,itens serão excluídos" }} junto com ela.{% else %}A coleção está vazia, nenhum item será afetado.{% endif %}" data-confirm-button="Excluir coleção e itens" aria-label="Excluir {{ collection.name }}" title="Excluir">
         {% include "partials/icon.html" with name="trash" %}
       </a>
     </span>
