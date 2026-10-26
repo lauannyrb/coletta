@@ -1,0 +1,9 @@
+{# Faixa de contexto da coleção. Espera `collection` e `item_count`. #}
+<section class="collection-strip">
+  <span class="strip-icon" aria-hidden="true">{% include "partials/icon.html" with name="archive" %}</span>
+  <div>
+    <p class="eyebrow">Acervo ativo · {{ collection.get_category_display }}</p>
+    <p class="strip-title"><a href="{% url 'collection_detail' collection.pk %}">{{ collection.name }}</a></p>
+  </div>
+  <span class="badge strip-count">{{ item_count }} {{ item_count|pluralize:"item cadastrado,itens cadastrados" }}</span>
+</section>

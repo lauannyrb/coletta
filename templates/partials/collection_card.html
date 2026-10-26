@@ -1,14 +1,24 @@
 {% load colecoes_extras %}{# Card de coleção. Espera `collection` com `item_count` (annotate). #}
 <article class="collection-card">
-  <div class="collection-cover" aria-hidden="true">
-    {% include "partials/icon.html" with name="star" %}
+  <div class="collection-media">
+    <div class="collection-cover" aria-hidden="true">
+      {% if collection.cover %}
+        <img src="{% url 'collection_cover' collection.pk %}?v={{ collection.cover|versao_capa }}" alt="" loading="lazy">
+      {% else %}
+        {% include "partials/icon.html" with name="star" %}
+      {% endif %}
+    </div>
+    <span class="badge collection-category">{{ collection.get_category_display }}</span>
+    <span class="badge collection-count">{% include "partials/icon.html" with name="list" %}{{ collection.item_count }} {{ collection.item_count|pluralize:"item,itens" }}</span>
   </div>
-  <span class="badge collection-count">{{ collection.item_count }} {{ collection.item_count|pluralize:"item,itens" }}</span>
 
   <div class="collection-body">
     <h3><a class="stretched-link" href="{% url 'collection_detail' collection.pk %}">{{ collection.name }}</a></h3>
     {% if collection.description %}
       <p class="collection-description">{{ collection.description|truncatechars:90 }}</p>
+    {% endif %}
+    {% if collection.tag_list %}
+      <p class="card-tags">{% for tag in collection.tag_list|slice:":3" %}<span>#{{ tag }}</span>{% endfor %}</p>
     {% endif %}
   </div>
 
@@ -22,7 +32,7 @@
       <a class="icon-btn" href="{% url 'collection_update' collection.pk %}" aria-label="Editar {{ collection.name }}" title="Editar">
         {% include "partials/icon.html" with name="edit" %}
       </a>
-      <a class="icon-btn icon-btn--danger" href="{% url 'collection_delete' collection.pk %}" aria-label="Excluir {{ collection.name }}" title="Excluir">
+      <a class="icon-btn icon-btn--danger" href="{% url 'collection_delete' collection.pk %}" data-confirm="Excluir a coleção “{{ collection.name }}”?" data-confirm-text="{% if collection.item_count %}{{ collection.item_count }} {{ collection.item_count|pluralize:"item será excluído,itens serão excluídos" }} junto com ela.{% else %}A coleção está vazia.{% endif %} Esta ação não pode ser desfeita." data-confirm-button="Excluir coleção e itens" aria-label="Excluir {{ collection.name }}" title="Excluir">
         {% include "partials/icon.html" with name="trash" %}
       </a>
     </span>

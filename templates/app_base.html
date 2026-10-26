@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load colecoes_extras %}
+{% load static colecoes_extras %}
 
 {% block body_class %}page-app{% endblock %}
 
@@ -14,7 +14,7 @@
         {% include "partials/icon.html" with name="grid" %}
         Início
       </a>
-      <a href="{% url 'collection_list' %}"{% if 'collection' in url_name or 'item' in url_name %} aria-current="page"{% endif %}>
+      <a href="{% url 'collection_list' %}"{% if 'collection' in url_name or 'item' in url_name or 'field' in url_name %} aria-current="page"{% endif %}>
         {% include "partials/icon.html" with name="archive" %}
         Minhas coleções
       </a>
@@ -46,7 +46,10 @@
         <label class="visually-hidden" for="busca-global">Buscar coleções ou itens</label>
         {% include "partials/icon.html" with name="search" %}
         <input id="busca-global" type="search" name="q" value="{{ query|default:'' }}" maxlength="100"
-               placeholder="Buscar coleções ou itens…" autocomplete="off">
+               placeholder="Buscar coleções, itens ou #tags…" autocomplete="off"
+               aria-controls="busca-resultados" aria-expanded="false">
+        <button type="submit" class="btn btn-primary btn-sm">Buscar</button>
+        <div id="busca-resultados" class="search-live" aria-live="polite" hidden></div>
       </form>
     </header>
 
@@ -56,4 +59,26 @@
     </main>
   </div>
 </div>
+{# Modal de exclusão (static/js/confirmar.js). Sem JS, os links levam à página de confirmação. #}
+<dialog class="modal" id="modal-excluir" aria-labelledby="modal-excluir-titulo" aria-describedby="modal-excluir-texto">
+  <form method="post" class="modal-card">
+    {% csrf_token %}
+    <span class="confirm-icon">{% include "partials/icon.html" with name="trash" %}</span>
+    <h2 id="modal-excluir-titulo" data-modal-title></h2>
+    <div class="alert alert-error">
+      {% include "partials/icon.html" with name="alert" %}
+      <p id="modal-excluir-texto" data-modal-text></p>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" data-modal-cancel>Cancelar</button>
+      <button type="submit" class="btn btn-danger">
+        {% include "partials/icon.html" with name="trash" %}
+        <span data-modal-button>Excluir</span>
+      </button>
+    </div>
+  </form>
+</dialog>
+<script src="{% static 'js/busca.js' %}" defer></script>
+<script src="{% static 'js/confirmar.js' %}" defer></script>
+{% block scripts %}{% endblock %}
 {% endblock %}

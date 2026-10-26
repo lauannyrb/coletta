@@ -65,6 +65,9 @@ pelo deploy automático. Assim, problemas de infraestrutura aparecem com tempo p
 - [x] CRUD de coleções (cards, formulário, confirmação de exclusão avisando sobre os itens)
 - [x] Detalhe da coleção + CRUD de itens
 - [x] Busca (coleções e itens do usuário, `icontains`, estado "nenhum resultado")
+- [x] Busca em tempo real (sugestões enquanto digita, `static/js/busca.js` + `?parcial=1`)
+- [x] Filtros com aplicação automática e chips removíveis; exclusão em modal (`<dialog>` + POST com CSRF)
+- [x] Prévia da capa ao escolher a imagem (`static/js/capa.js`, CSP `img-src blob:`)
 - [x] Estados vazios e erros de formulário
 - [x] Todas as consultas filtradas pelo dono (regras da seção 8 do `CLAUDE.md`)
 
@@ -97,4 +100,15 @@ pelo deploy automático. Assim, problemas de infraestrutura aparecem com tempo p
 
 ## Fase 8 — Visual e extras
 - [x] Ajuste visual fiel ao protótipo do Figma (totais com detalhes reais, avatar, busca lavanda, painel do login)
-- [ ] Imagens (capa e foto de item), somente se sobrar tempo
+- [x] Capa das coleções (só a coleção; itens sem foto): Pillow 13, validação pelo conteúdo, regravação em
+      WEBP, nome aleatório, fora da pasta pública, servida só ao dono
+- [ ] Servidor: criar `/var/lib/coletta/media`, `MEDIA_DIR` no `.env`, Nginx com `client_max_body_size 3m`
+
+## Fase 9 — Aplicação mais completa (inspirada nas telas novas do Figma)
+- [x] Coleção: categoria principal, ano de início, tags
+- [x] Item: subcategoria/edição, ano, estado de conservação, local de guarda, notas
+- [x] Campos personalizados por coleção (texto e número, até 10), com isolamento e testes de acesso cruzado
+- [x] Ficha do item; detalhe da coleção com resumo por estado, filtros e ordenação
+- [x] Formulários em duas colunas, breadcrumb, faixa da coleção, "continuar adicionando"
+- [x] README: funcionalidades, modelo de dados (Mermaid) e segurança atualizados
+- [ ] Publicar e conferir em produção

@@ -21,7 +21,7 @@
       <p class="stat-label">Total de coleções</p>
       <p class="stat-value">{{ total_collections }}</p>
       <p class="stat-detail">
-        {% if total_categories %}Itens em {{ total_categories }} {{ total_categories|pluralize:"categoria,categorias" }}{% elif total_items %}Itens ainda sem categoria{% else %}Nenhum item cadastrado ainda{% endif %}
+        {% if total_collections %}Em {{ total_categories }} {{ total_categories|pluralize:"categoria,categorias" }}{% else %}Nenhuma coleção ainda{% endif %}
       </p>
     </div>
     <span class="stat-icon">{% include "partials/icon.html" with name="folder" %}</span>

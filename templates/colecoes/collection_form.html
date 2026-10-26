@@ -1,26 +1,104 @@
 {% extends "app_base.html" %}
+{% load static colecoes_extras %}
 
 {% block title %}{% if collection %}Editar coleção{% else %}Nova coleção{% endif %}{% endblock %}
 
 {% block content %}
-<a class="back-link" href="{% if collection %}{% url 'collection_detail' collection.pk %}{% else %}{% url 'collection_list' %}{% endif %}">
-  {% include "partials/icon.html" with name="arrow-left" %}
-  Voltar
-</a>
+<nav class="breadcrumb" aria-label="Você está em">
+  <ol>
+    <li><a href="{% url 'collection_list' %}">Minhas coleções</a></li>
+    {% if collection %}
+      <li><a href="{% url 'collection_detail' collection.pk %}">{{ collection.name }}</a></li>
+      <li aria-current="page">Editar</li>
+    {% else %}
+      <li aria-current="page">Nova coleção</li>
+    {% endif %}
+  </ol>
+</nav>
 
 <header class="page-header">
-  <h1>{% if collection %}Editar coleção{% else %}Nova coleção{% endif %}</h1>
-  <p class="page-subtitle">Campos com <span class="required">*</span> são obrigatórios.</p>
+  <p class="eyebrow">Catálogo pessoal</p>
+  <h1>{% if collection %}Editar coleção{% else %}Criar nova coleção{% endif %}</h1>
+  <p class="page-subtitle">Dê um espaço dedicado para reunir e catalogar seus objetos favoritos com carinho, contexto e detalhes.</p>
 </header>
 
-<form method="post" class="form form-card" novalidate>
+<form method="post" class="layout-2col" enctype="multipart/form-data" novalidate>
   {% csrf_token %}
-  {% include "partials/form_errors.html" %}
-  {% include "partials/field.html" with field=form.name %}
-  {% include "partials/field.html" with field=form.description %}
-  <div class="form-actions">
-    <a class="btn btn-secondary" href="{% if collection %}{% url 'collection_detail' collection.pk %}{% else %}{% url 'collection_list' %}{% endif %}">Cancelar</a>
-    <button type="submit" class="btn btn-primary">{% if collection %}Salvar alterações{% else %}Criar coleção{% endif %}</button>
+  <div class="form form-card">
+    {% include "partials/form_errors.html" %}
+    {% include "partials/field.html" with field=form.name %}
+    <div class="form-row">
+      {% include "partials/field.html" with field=form.category %}
+      {% include "partials/field.html" with field=form.start_year %}
+    </div>
+    {% include "partials/field.html" with field=form.tags icon="tag" %}
+    {% include "partials/field.html" with field=form.description %}
+    <div class="form-footer">
+      <p class="meta">{% include "partials/icon.html" with name="alert" %} Campos com <span class="required">*</span> são obrigatórios</p>
+      <div class="form-actions">
+        <a class="btn btn-secondary" href="{% if collection %}{% url 'collection_detail' collection.pk %}{% else %}{% url 'collection_list' %}{% endif %}">Cancelar</a>
+        <button type="submit" class="btn btn-primary">{% if collection %}Salvar alterações{% else %}Salvar coleção{% endif %}</button>
+      </div>
+    </div>
   </div>
+
+  <aside class="side-column">
+    <section class="side-card">
+      <div class="side-card-header">
+        <h2>Capa da coleção</h2>
+        <span class="meta">Opcional</span>
+      </div>
+      <p class="side-card-text">Uma fotografia emblemática para estampar o cartão da coleção no seu acervo.</p>
+      {% comment %}A área tracejada é o rótulo do campo de arquivo: clicar nela abre o seletor. A prévia da
+      imagem escolhida é feita no navegador (static/js/capa.js); sem JS o envio funciona igual.{% endcomment %}
+      <div class="cover-field{% if form.cover.errors %} field--error{% endif %}" data-cover-field>
+        {{ form.cover }}
+        <label class="cover-drop{% if collection.cover %} has-image{% endif %}" for="{{ form.cover.id_for_label }}">
+          {% if collection.cover %}
+            <img class="cover-preview" src="{% url 'collection_cover' collection.pk %}?v={{ collection.cover|versao_capa }}" alt="Capa atual" data-cover-current>
+          {% endif %}
+          <img class="cover-preview" alt="Prévia da nova capa" data-cover-preview hidden>
+          <span class="cover-drop-empty">
+            <span class="cover-drop-icon">{% include "partials/icon.html" with name="image" %}</span>
+            <strong>Escolher imagem</strong>
+            <span>JPG, PNG ou WEBP, até 2 MB</span>
+          </span>
+          <span class="cover-drop-change">{% include "partials/icon.html" with name="image" %} Trocar imagem</span>
+        </label>
+        <p class="cover-file" data-cover-file hidden>
+          <span data-cover-name></span>
+          <button type="button" class="btn btn-ghost btn-sm" data-cover-clear>{% include "partials/icon.html" with name="x" %} Desfazer</button>
+        </p>
+        <p class="cover-warning" data-cover-warning role="alert" hidden></p>
+        {% if form.cover.errors %}
+        <ul class="field-errors" id="{{ form.cover.auto_id }}_error">
+          {% for error in form.cover.errors %}<li>{% include "partials/icon.html" with name="alert" %}{{ error }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+      {% if collection.cover %}
+        <label class="checkbox" for="{{ form.remove_cover.id_for_label }}">
+          {{ form.remove_cover }}
+          {{ form.remove_cover.label }}
+        </label>
+      {% endif %}
+    </section>
+
+    <section class="tip-card">
+      <span class="tip-icon">{% include "partials/icon.html" with name="bulb" %}</span>
+      <div>
+        <h2>Dica da curadoria</h2>
+        {% if collection %}
+          <p>Cada coleção pode ter campos próprios, como número de série, gravadora ou tiragem.
+             <a href="{% url 'collection_fields' collection.pk %}">Gerenciar os campos desta coleção</a>.</p>
+        {% else %}
+          <p>Depois de criar a coleção, você poderá adicionar campos personalizados (número de série,
+             gravadora, tiragem...) que aparecerão no cadastro de cada item.</p>
+        {% endif %}
+      </div>
+    </section>
+  </aside>
 </form>
 {% endblock %}
+
+{% block scripts %}<script src="{% static 'js/capa.js' %}" defer></script>{% endblock %}

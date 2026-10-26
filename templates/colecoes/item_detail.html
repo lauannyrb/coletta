@@ -1,0 +1,88 @@
+{% extends "app_base.html" %}
+{% load colecoes_extras %}
+
+{% block title %}{{ item.name }}{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb" aria-label="Você está em">
+  <ol>
+    <li><a href="{% url 'collection_list' %}">Minhas coleções</a></li>
+    <li><a href="{% url 'collection_detail' collection.pk %}">{{ collection.name }}</a></li>
+    <li aria-current="page">{{ item.name }}</li>
+  </ol>
+</nav>
+
+<header class="page-header page-header--actions">
+  <div>
+    <p class="eyebrow">Ficha do item</p>
+    <h1>{{ item.name }}</h1>
+    <p class="meta-row">
+      {% if item.condition %}<span class="cond-badge"><span class="cond-dot cond-{{ item.condition }}" aria-hidden="true"></span>{{ item.get_condition_display }}</span>{% endif %}
+      {% if item.edition %}<span class="badge">{{ item.edition }}</span>{% endif %}
+    </p>
+  </div>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="{% url 'item_update' item.pk %}">{% include "partials/icon.html" with name="edit" %} Editar</a>
+    <a class="btn btn-danger-outline" href="{% url 'item_delete' item.pk %}" data-confirm="Excluir o item “{{ item.name }}”?" data-confirm-text="Ele será removido da coleção “{{ item.collection.name }}”. Esta ação não pode ser desfeita." data-confirm-button="Excluir item">{% include "partials/icon.html" with name="trash" %} Excluir</a>
+  </div>
+</header>
+
+<div class="layout-2col">
+  <div class="stack">
+    <section class="form-card">
+      <h2 class="card-title">Dados da peça</h2>
+      <dl class="fact-grid">
+        <div><dt>Subcategoria / edição</dt><dd>{{ item.edition|default:"—" }}</dd></div>
+        <div><dt>Ano de lançamento ou aquisição</dt><dd>{{ item.year|default:"—" }}</dd></div>
+        <div><dt>Estado de conservação</dt><dd>{{ item.get_condition_display|default:"—" }}</dd></div>
+        <div><dt>Local de guarda</dt><dd>{{ item.location|default:"—" }}</dd></div>
+      </dl>
+    </section>
+
+    <section class="form-card">
+      <div class="side-card-header">
+        <h2 class="card-title">Campos desta coleção</h2>
+        <a class="link-arrow" href="{% url 'collection_fields' collection.pk %}">Gerenciar {% include "partials/icon.html" with name="arrow-right" %}</a>
+      </div>
+      {% if field_values %}
+        <dl class="fact-grid">
+          {% for fv in field_values %}<div><dt>{{ fv.field.name }}</dt><dd>{{ fv.value }}</dd></div>{% endfor %}
+        </dl>
+      {% else %}
+        <p class="side-card-text">Nenhum campo personalizado preenchido para este item.</p>
+      {% endif %}
+    </section>
+
+    <section class="form-card">
+      <h2 class="card-title">Notas do colecionador</h2>
+      {% if item.description %}
+        <p class="notes">{{ item.description|linebreaksbr }}</p>
+      {% else %}
+        <p class="side-card-text">Sem notas. <a href="{% url 'item_update' item.pk %}">Adicionar notas</a></p>
+      {% endif %}
+    </section>
+  </div>
+
+  <aside class="side-column">
+    <section class="side-card">
+      <div class="collection-cover collection-cover--sm" aria-hidden="true">
+        {% if collection.cover %}
+          <img src="{% url 'collection_cover' collection.pk %}?v={{ collection.cover|versao_capa }}" alt="">
+        {% else %}
+          {% include "partials/icon.html" with name="star" %}
+        {% endif %}
+      </div>
+      <p class="eyebrow">Faz parte de</p>
+      <h2><a href="{% url 'collection_detail' collection.pk %}">{{ collection.name }}</a></h2>
+      <p class="side-card-text">{{ collection.get_category_display }}</p>
+    </section>
+
+    <section class="side-card">
+      <dl class="fact-list">
+        <div><dt>Cadastrado em</dt><dd>{{ item.created_at|date:"d/m/Y, H:i" }}</dd></div>
+        <div><dt>Última alteração</dt><dd>{{ item.updated_at|ha_quanto_tempo }}</dd></div>
+      </dl>
+    </section>
+  </aside>
+</div>
+{% endblock %}

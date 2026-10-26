@@ -1,4 +1,5 @@
 from datetime import timedelta
+from pathlib import PurePosixPath
 
 from django import template
 from django.utils import timezone
@@ -25,3 +26,9 @@ def iniciais(nome):
         return '?'
     letras = partes[0][0] + (partes[-1][0] if len(partes) > 1 else '')
     return letras.upper()
+
+
+@register.filter
+def versao_capa(cover):
+    """Nome aleatório do arquivo da capa, usado na URL para invalidar o cache quando ela muda."""
+    return PurePosixPath(cover.name).stem if cover else ''

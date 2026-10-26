@@ -1,0 +1,43 @@
+{# Trecho devolvido pela busca em tempo real (?parcial=1) e inserido abaixo da barra de busca #}
+{% if query %}
+  {% if collections or items %}
+    {% if collections %}
+      <p class="search-live-title">Coleções</p>
+      <ul class="search-live-list">
+        {% for collection in collections %}
+        <li>
+          <a href="{% url 'collection_detail' collection.pk %}">
+            <span class="search-live-icon">{% include "partials/icon.html" with name="archive" %}</span>
+            <span class="search-live-text">
+              <strong>{{ collection.name }}</strong>
+              <span>{{ collection.get_category_display }} · {{ collection.item_count }} {{ collection.item_count|pluralize:"item,itens" }}</span>
+            </span>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% if items %}
+      <p class="search-live-title">Itens</p>
+      <ul class="search-live-list">
+        {% for item in items %}
+        <li>
+          <a href="{% url 'item_detail' item.pk %}">
+            <span class="search-live-icon">{% include "partials/icon.html" with name="tag" %}</span>
+            <span class="search-live-text">
+              <strong>{{ item.name }}</strong>
+              <span>{% if item.edition %}{{ item.edition }} · {% endif %}em {{ item.collection.name }}</span>
+            </span>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    <a class="search-live-all" href="{% url 'search' %}?q={{ query|urlencode }}">
+      Ver todos os {{ total }} resultado{{ total|pluralize }}
+      {% include "partials/icon.html" with name="arrow-right" %}
+    </a>
+  {% else %}
+    <p class="search-live-empty">Nada encontrado para “{{ query }}”.</p>
+  {% endif %}
+{% endif %}

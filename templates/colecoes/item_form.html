@@ -3,26 +3,97 @@
 {% block title %}{% if item %}Editar item{% else %}Novo item{% endif %}{% endblock %}
 
 {% block content %}
-<a class="back-link" href="{% url 'collection_detail' collection.pk %}">
-  {% include "partials/icon.html" with name="arrow-left" %}
-  {{ collection.name }}
-</a>
+<nav class="breadcrumb" aria-label="Você está em">
+  <ol>
+    <li><a href="{% url 'collection_list' %}">Minhas coleções</a></li>
+    <li><a href="{% url 'collection_detail' collection.pk %}">{{ collection.name }}</a></li>
+    {% if item %}
+      <li><a href="{% url 'item_detail' item.pk %}">{{ item.name }}</a></li>
+      <li aria-current="page">Editar</li>
+    {% else %}
+      <li aria-current="page">Adicionar novo item</li>
+    {% endif %}
+  </ol>
+</nav>
 
-<header class="page-header">
-  <p class="eyebrow">{{ collection.name }}</p>
-  <h1>{% if item %}Editar item{% else %}Novo item{% endif %}</h1>
-  <p class="page-subtitle">Campos com <span class="required">*</span> são obrigatórios.</p>
-</header>
+{% include "partials/collection_strip.html" %}
 
-<form method="post" class="form form-card" novalidate>
+<form method="post" class="layout-2col" novalidate>
   {% csrf_token %}
-  {% include "partials/form_errors.html" %}
-  {% include "partials/field.html" with field=form.name %}
-  {% include "partials/field.html" with field=form.category %}
-  {% include "partials/field.html" with field=form.description %}
-  <div class="form-actions">
-    <a class="btn btn-secondary" href="{% url 'collection_detail' collection.pk %}">Cancelar</a>
-    <button type="submit" class="btn btn-primary">{% if item %}Salvar alterações{% else %}Adicionar item{% endif %}</button>
+  <div class="form form-card">
+    <header class="form-card-header">
+      <h1>{% if item %}Editar item{% else %}Ficha do novo item{% endif %}</h1>
+      <p class="page-subtitle">Insira os dados essenciais e as particularidades para catalogar este exemplar no acervo.</p>
+    </header>
+
+    {% include "partials/form_errors.html" %}
+    {% include "partials/field.html" with field=form.name %}
+    <div class="form-row">
+      {% include "partials/field.html" with field=form.edition %}
+      {% include "partials/field.html" with field=form.year icon="calendar" %}
+    </div>
+    <div class="form-row">
+      {% include "partials/field.html" with field=form.condition %}
+      {% include "partials/field.html" with field=form.location icon="pin" %}
+    </div>
+
+    {% if form.custom_bound_fields %}
+      <fieldset class="custom-fields">
+        <legend>Campos desta coleção</legend>
+        <div class="form-row">
+          {% for field in form.custom_bound_fields %}
+            {% include "partials/field.html" with field=field %}
+          {% endfor %}
+        </div>
+      </fieldset>
+    {% endif %}
+
+    {% include "partials/field.html" with field=form.description %}
+
+    {% if not item %}
+      <label class="checkbox" for="id_add_another">
+        <input type="checkbox" name="add_another" id="id_add_another" value="1"{% if add_another %} checked{% endif %}>
+        Continuar adicionando outros itens após salvar
+      </label>
+    {% endif %}
+
+    <div class="form-actions form-actions--wide">
+      <a class="btn btn-secondary" href="{% if item %}{% url 'item_detail' item.pk %}{% else %}{% url 'collection_detail' collection.pk %}{% endif %}">Cancelar</a>
+      <button type="submit" class="btn btn-primary">
+        {% include "partials/icon.html" with name="plus" %}
+        {% if item %}Salvar alterações{% else %}Cadastrar item{% endif %}
+      </button>
+    </div>
   </div>
+
+  <aside class="side-column">
+    <section class="side-card">
+      <div class="side-card-header">
+        <h2>Campos personalizados</h2>
+        <span class="badge">{{ form.custom_bound_fields|length }}</span>
+      </div>
+      {% if form.custom_bound_fields %}
+        <p class="side-card-text">Esta coleção tem campos próprios, que aparecem no formulário ao lado:</p>
+        <ul class="chip-list">
+          {% for field in form.custom_fields %}<li class="chip">{{ field.name }}</li>{% endfor %}
+        </ul>
+      {% else %}
+        <p class="side-card-text">Precisa registrar algo específico desta coleção, como número de série, gravadora ou tiragem? Crie campos próprios para ela.</p>
+      {% endif %}
+      <a class="btn btn-secondary btn-sm" href="{% url 'collection_fields' collection.pk %}">
+        {% include "partials/icon.html" with name="sliders" %}
+        Gerenciar campos
+      </a>
+    </section>
+
+    <section class="tip-card">
+      <span class="tip-icon">{% include "partials/icon.html" with name="bulb" %}</span>
+      <div>
+        <h2>Dica de conservação e registro</h2>
+        <p>Anote o local de guarda e o estado de conservação logo ao cadastrar: fica fácil encontrar a peça
+           e acompanhar se ela precisa de cuidados com o tempo.</p>
+      </div>
+    </section>
+  </aside>
 </form>
 {% endblock %}

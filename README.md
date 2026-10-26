@@ -34,15 +34,28 @@ de *Secure by Design* e *Secure by Default*. Este README é o **relatório técn
 | Cadastro (nome, e-mail, senha, confirmação) | `/cadastro/` | Público |
 | Início: totais reais de coleções e itens, última atualização, coleções recentes | `/` | Autenticado |
 | Minhas coleções (cards com quantidade de itens) | `/colecoes/` | Autenticado |
-| Criar / editar coleção | `/colecoes/nova/`, `/colecoes/<id>/editar/` | Dono |
-| Detalhe da coleção com seus itens | `/colecoes/<id>/` | Dono |
-| Criar / editar item | `/colecoes/<id>/itens/novo/`, `/itens/<id>/editar/` | Dono |
+| Criar / editar coleção, com capa opcional (imagem) | `/colecoes/nova/`, `/colecoes/<id>/editar/` | Dono |
+| Imagem de capa da coleção | `/colecoes/<id>/capa/` | Dono |
+| Detalhe da coleção: itens em cards, resumo por estado de conservação, filtros e ordenação | `/colecoes/<id>/` | Dono |
+| Campos personalizados da coleção (criar, renomear, excluir) | `/colecoes/<id>/campos/` | Dono |
+| Criar / editar item (com os campos personalizados da coleção) | `/colecoes/<id>/itens/novo/`, `/itens/<id>/editar/` | Dono |
+| Ficha do item | `/itens/<id>/` | Dono |
 | Confirmação de exclusão (avisa quantos itens serão removidos) | `.../excluir/` | Dono |
-| Busca por nome de coleção ou item | `/busca/?q=` | Autenticado |
+| Busca por nome de coleção ou item, edição do item ou tag (`#rara`), com sugestões em tempo real enquanto digita | `/busca/?q=` | Autenticado |
 | Logout (botão em formulário POST) | `/sair/` | Autenticado |
 
-Todas as telas têm estado vazio, mensagens de erro por campo (com ícone e texto, nunca só por cor) e
-layout responsivo. O visual segue o protótipo feito no Figma (paleta, tipografia Plus Jakarta Sans e
+**Dados catalogados:**
+
+- **Coleção:** nome, categoria principal (lista fixa, como Música, Fotografia, Bonecas & Brinquedos), ano de
+  início, tags, descrição e capa.
+- **Item:** nome, subcategoria/edição, ano de lançamento ou aquisição, estado de conservação (Lacrado,
+  Excelente, Bom, Regular, Danificado), local de guarda e notas do colecionador.
+- **Campos personalizados:** cada coleção pode definir até 10 campos próprios, de texto ou número (ex.:
+  "Gravadora" para discos, "Montagem da lente" para câmeras), que aparecem no cadastro e na ficha de todos os
+  itens dela.
+
+Todas as telas têm estado vazio, navegação estrutural (*breadcrumb*), mensagens de erro por campo (com ícone
+e texto, nunca só por cor) e layout responsivo. O visual segue o protótipo feito no Figma (paleta, tipografia Plus Jakarta Sans e
 componentes do *brand guide*).
 
 ## 2. Stack
@@ -51,9 +64,10 @@ componentes do *brand guide*).
 |---|---|
 | Linguagem | Python 3.14 (gerenciado com [uv](https://docs.astral.sh/uv/)) |
 | Framework | Django 6.1 (templates renderizados no servidor) |
-| Front-end | HTML + CSS puro, sem JavaScript e sem CDN (fonte e CSS servidos localmente) |
+| Front-end | HTML + CSS puro; quatro scripts próprios e pequenos em `static/js/` (busca em tempo real, filtros automáticos, modal de exclusão e prévia da capa), todos opcionais (sem JS tudo funciona); nada de CDN |
 | Banco de dados | SQLite |
 | Limite de tentativas de login | django-axes 8.3 |
+| Processamento das capas | Pillow 13.0 |
 | Servidor de aplicação | Gunicorn (serviço systemd com socket Unix) |
 | Web server | Nginx 1.28 (proxy reverso, HTTPS, arquivos estáticos) |
 | Certificado | Let's Encrypt via Certbot 5.8 (certificado para o IP) |
@@ -88,6 +102,46 @@ flowchart LR
     U -.->|"HTTP :80 → 301 para HTTPS"| FW
     GH -->|"SSH :22 a cada push na main"| FW
 ```
+
+Modelo de dados:
+
+```mermaid
+erDiagram
+    USER ||--o{ COLLECTION : "possui"
+    COLLECTION ||--o{ COLLECTION_ITEM : "contém"
+    COLLECTION ||--o{ COLLECTION_FIELD : "define"
+    COLLECTION_ITEM ||--o{ ITEM_FIELD_VALUE : "preenche"
+    COLLECTION_FIELD ||--o{ ITEM_FIELD_VALUE : "recebe"
+
+    USER {
+        string email UK
+        string name
+    }
+    COLLECTION {
+        string name
+        string category
+        int start_year
+        string tags
+        image cover
+    }
+    COLLECTION_ITEM {
+        string name
+        string edition
+        int year
+        string condition
+        string location
+    }
+    COLLECTION_FIELD {
+        string name
+        string field_type "texto ou número"
+    }
+    ITEM_FIELD_VALUE {
+        string value
+    }
+```
+
+O item não tem dono próprio: pertence ao usuário por meio da coleção. O mesmo vale para os campos
+personalizados e seus valores, e é isso que permite verificar a posse de tudo a partir da coleção.
 
 Estrutura do código:
 
@@ -126,7 +180,7 @@ No `.env`, gere uma `SECRET_KEY` própria e, para desenvolvimento, use `DEBUG=Tr
 .venv/bin/python -c "from django.core.management.utils import get_random_secret_key as g; print(g())"
 ```
 
-Testes (43 testes automatizados):
+Testes (77 testes automatizados):
 
 ```bash
 .venv/bin/python manage.py test
@@ -154,24 +208,29 @@ O principal risco de um sistema multiusuário é um usuário acessar dados de ou
 (IDOR). No Coletta, **nenhuma consulta busca um objeto só pelo ID**:
 
 - Coleções são sempre buscadas junto com o dono —
-  [`colecoes/views.py#L22`](colecoes/views.py#L22):
+  [`colecoes/views.py#L34`](colecoes/views.py#L34):
   `get_object_or_404(Collection, pk=pk, user=request.user)`.
-- Itens são buscados pela coleção do dono — [`colecoes/views.py#L26`](colecoes/views.py#L26):
+- Itens são buscados pela coleção do dono — [`colecoes/views.py#L38`](colecoes/views.py#L38):
   `get_object_or_404(CollectionItem, pk=pk, collection__user=request.user)`.
 - Ao criar um item, a coleção de destino também passa pela verificação de dono
-  ([`colecoes/views.py#L116`](colecoes/views.py#L116)); o ID vindo do navegador nunca é confiado.
+  ([`colecoes/views.py#L253`](colecoes/views.py#L253)); o ID vindo do navegador nunca é confiado.
 - Listagens, totais e busca partem sempre do usuário logado
-  ([`colecoes/views.py#L162`](colecoes/views.py#L162)).
-- O dono é definido no servidor ([`colecoes/views.py#L71`](colecoes/views.py#L71)) e os formulários não
-  têm campo `user` nem `collection` ([`colecoes/forms.py#L5`](colecoes/forms.py#L5)): um `user` forjado no
+  ([`colecoes/views.py#L305`](colecoes/views.py#L305)).
+- O dono é definido no servidor ([`colecoes/views.py#L88`](colecoes/views.py#L88)) e os formulários não
+  têm campo `user` nem `collection` ([`colecoes/forms.py#L10`](colecoes/forms.py#L10)): um `user` forjado no
   POST é ignorado (há teste para isso).
 - Todas as views privadas usam `@login_required`.
 - Recurso de outro usuário responde **404**, idêntico ao de um ID inexistente, para não revelar se o
   registro existe.
+- **Campos personalizados** seguem a mesma regra: são buscados pela coleção do dono
+  ([`colecoes/views.py#L46`](colecoes/views.py#L46)), e o formulário do item só monta os campos da coleção
+  do próprio item ([`colecoes/forms.py#L126`](colecoes/forms.py#L126)). Um ID de campo de outra coleção
+  enviado no POST é simplesmente ignorado (testado em
+  [`colecoes/tests.py#L519`](colecoes/tests.py#L519)).
 - Exclusões só acontecem por POST (o GET apenas mostra a confirmação).
 - O `/admin/` do Django só existe em desenvolvimento ([`config/urls.py#L28`](config/urls.py#L28)).
 
-**Teste de acesso cruzado** ([`colecoes/tests.py#L191`](colecoes/tests.py#L191)): a usuária B tenta ver,
+**Teste de acesso cruzado** ([`colecoes/tests.py#L192`](colecoes/tests.py#L192)): a usuária B tenta ver,
 editar e excluir a coleção da usuária A, editar e excluir um item dela e criar um item na coleção dela.
 Todas as tentativas recebem 404 e nada é alterado:
 
@@ -199,7 +258,7 @@ Ran 7 tests ... OK
 - **Cadastro em massa:** limite de 10 envios por hora por IP
   ([`accounts/views.py#L10`](accounts/views.py#L10), [`accounts/ratelimit.py#L9`](accounts/ratelimit.py#L9)).
 - **IP real do cliente:** atrás do Nginx, o IP vem do cabeçalho `X-Real-IP`, que o Nginx sobrescreve
-  ([`deploy/nginx/coletta.conf#L57`](deploy/nginx/coletta.conf#L57)); o cabeçalho só é aceito quando o
+  ([`deploy/nginx/coletta.conf#L58`](deploy/nginx/coletta.conf#L58)); o cabeçalho só é aceito quando o
   sistema está configurado como atrás de proxy ([`accounts/utils.py#L4`](accounts/utils.py#L4)), para não
   ser forjado.
 - **Mensagem genérica:** "E-mail ou senha inválidos.", sem dizer qual dos dois errou
@@ -208,7 +267,7 @@ Ran 7 tests ... OK
   ([`accounts/models.py#L52`](accounts/models.py#L52)) e validado no cadastro
   ([`accounts/forms.py#L23`](accounts/forms.py#L23)).
 - **Sessão:** `login()` gera uma nova chave de sessão; a sessão expira em 8 horas, com cookie `HttpOnly`
-  e `Secure` ([`config/settings.py#L200`](config/settings.py#L200)).
+  e `Secure` ([`config/settings.py#L206`](config/settings.py#L206)).
 - **Logout:** só por POST com token CSRF ([`accounts/urls.py#L17`](accounts/urls.py#L17)); um GET em
   `/sair/` recebe 405.
 - Não há usuário padrão nem credencial fixa no código.
@@ -216,21 +275,64 @@ Ran 7 tests ... OK
 ### A05 – Injection
 
 - **SQL:** todo acesso ao banco usa o ORM do Django, que gera consultas parametrizadas. Não existe SQL
-  escrito à mão no projeto. A busca usa `name__icontains` ([`colecoes/views.py#L167`](colecoes/views.py#L167)),
-  com o termo limitado a 100 caracteres.
+  escrito à mão no projeto. A busca usa `icontains` em nome, edição e tags
+  ([`colecoes/views.py#L312`](colecoes/views.py#L312)), com o termo limitado a 100 caracteres.
+- **Parâmetros de filtro e ordenação:** na lista de itens, a ordenação vem de uma lista fechada
+  ([`colecoes/views.py#L23`](colecoes/views.py#L23)) e o estado de conservação só é aceito se for um dos
+  valores conhecidos ([`colecoes/views.py#L101`](colecoes/views.py#L101)); qualquer outro valor é ignorado. O
+  texto da URL nunca vira nome de coluna nem parte de consulta.
+- **Tags:** normalizadas e validadas no servidor ([`colecoes/forms.py#L16`](colecoes/forms.py#L16)): só
+  letras, números e hífen, até 8 tags de 30 caracteres.
 - **Entrada de dados:** todos os dados passam por `Form`/`ModelForm`, que validam tipo, campos
   obrigatórios, espaços e tamanho máximo antes de chegar ao banco.
 - **XSS:** os templates do Django escapam automaticamente qualquer conteúdo vindo do usuário. Além disso,
-  a **Content Security Policy** ([`config/settings.py#L208`](config/settings.py#L208)) só permite scripts,
+  a **Content Security Policy** ([`config/settings.py#L214`](config/settings.py#L214)) só permite scripts,
   estilos e fontes do próprio servidor: mesmo que algum HTML fosse injetado, um script inline ou externo
   não seria executado. Os templates não têm nenhum JavaScript nem CSS inline.
+  A única exceção é `blob:` em `img-src`, **só para imagens**: é o endereço temporário da prévia da capa
+  escolhida, gerada no próprio navegador antes do envio. Scripts continuam restritos a `'self'`.
+- **Busca em tempo real:** o `static/js/busca.js` pede à mesma view da busca um trecho de HTML
+  (`/busca/?q=...&parcial=1`), renderizado e escapado pelo template `templates/partials/search_live.html`,
+  com as mesmas consultas filtradas pelo dono. O script nunca monta HTML com o texto digitado. Sem JavaScript,
+  a busca continua funcionando pelo formulário normal.
+- **Modal de exclusão:** o `static/js/confirmar.js` abre um `<dialog>` que envia **POST com token CSRF**
+  para a mesma URL da página de confirmação. Os textos do modal vêm de atributos `data-*` escapados pelo
+  template e são inseridos com `textContent`. Sem JavaScript, o link abre a página de confirmação (o GET
+  nunca exclui nada).
 - **CSRF:** token obrigatório em todos os formulários POST.
+
+### Upload das capas das coleções
+
+O upload de arquivo é uma das portas de entrada mais perigosas de uma aplicação web. A capa da coleção
+foi implementada com várias camadas de proteção ([`colecoes/images.py#L17`](colecoes/images.py#L17)):
+
+- **Tipo validado pelo conteúdo, não pela extensão:** só JPEG, PNG e WEBP. O `Image.open` recebe a lista de
+  formatos permitidos ([`colecoes/images.py#L30`](colecoes/images.py#L30)), então arquivos GIF, TIFF, PDF,
+  XBM etc. nem chegam aos parsers desses formatos. Um texto renomeado para `.png` é recusado.
+- **Limites:** 2 MB por arquivo, 25 milhões de pixels (contra "bombas" de descompressão: um PNG pequeno em
+  bytes que ocuparia gigabytes de memória) e `client_max_body_size 3m` no Nginx
+  ([`deploy/nginx/coletta.conf#L28`](deploy/nginx/coletta.conf#L28)).
+- **Imagem regravada:** a foto é redimensionada (lado maior de 1600 px) e salva de novo em WEBP. Isso remove
+  metadados EXIF, como a localização GPS de fotos de celular, e qualquer conteúdo escondido junto da
+  imagem (arquivos "poliglotas").
+- **Nome aleatório** (`capas/<uuid>.webp`): o nome enviado pelo usuário nunca é usado.
+- **Prévia no navegador** (`static/js/capa.js`): mostra a imagem escolhida e já avisa sobre formato ou
+  tamanho errados, mas é só conveniência. Toda a validação acima acontece de novo no servidor.
+- **Fora da pasta pública:** os arquivos ficam em `/var/lib/coletta/media`, com permissão `600`
+  ([`config/settings.py#L185`](config/settings.py#L185)). O Nginx não os serve; não existe URL pública.
+- **Acesso só pelo dono:** a imagem é entregue por uma view que usa a mesma verificação de dono das
+  coleções ([`colecoes/views.py#L165`](colecoes/views.py#L165)); para outro usuário, 404.
+- **Limpeza:** a capa antiga é apagada do disco ao trocar, remover ou excluir a coleção
+  ([`colecoes/models.py#L150`](colecoes/models.py#L150)).
+
+Testes em [`colecoes/tests.py#L269`](colecoes/tests.py#L269): arquivo falso, formato não permitido, arquivo
+grande demais, dimensões gigantes, remoção do EXIF, acesso por outro usuário e limpeza dos arquivos.
 
 ### A02 – Security Misconfiguration
 
 - `SECRET_KEY` só existe no `.env` (o Django não sobe sem ela) e `DEBUG` é `False` se não for
   explicitamente ligado ([`config/settings.py#L31`](config/settings.py#L31)).
-- Em produção ([`config/settings.py#L225`](config/settings.py#L225)): redirecionamento para HTTPS,
+- Em produção ([`config/settings.py#L232`](config/settings.py#L232)): redirecionamento para HTTPS,
   cookies `Secure`, `CSRF_TRUSTED_ORIGINS` e CSP aplicada.
 - Cabeçalhos enviados: `Content-Security-Policy`, `Strict-Transport-Security` (pelo Nginx),
   `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin` e
@@ -252,7 +354,7 @@ Ran 7 tests ... OK
 
 ### A09 – Security Logging and Alerting Failures
 
-Configuração em [`config/settings.py#L244`](config/settings.py#L244). Os logs vão para o journal do
+Configuração em [`config/settings.py#L251`](config/settings.py#L251). Os logs vão para o journal do
 systemd no servidor (`journalctl -u coletta.service`):
 
 - **django-axes:** cada falha de login e cada bloqueio, com IP de origem (o e-mail tentado é mascarado).
@@ -301,8 +403,8 @@ falha no log, então o banimento acontece por volta da 2ª tentativa, mais rígi
 ### Aplicação
 
 - Usuário de sistema próprio, `coletta` (não root, sem senha).
-- Código em `/srv/coletta/app`; **banco e cache em `/var/lib/coletta`**, fora da pasta atualizada pelo
-  deploy.
+- Código em `/srv/coletta/app`; **banco, cache e capas em `/var/lib/coletta`**, fora da pasta atualizada
+  pelo deploy e fora da pasta servida pelo Nginx.
 - Gunicorn como serviço systemd ativado por socket Unix
   ([`deploy/systemd/`](deploy/systemd/)), com endurecimento: `ProtectSystem=strict` (só pode escrever em
   `/var/lib/coletta`), `NoNewPrivileges`, `PrivateTmp`, `ProtectHome` e outros.
@@ -331,10 +433,10 @@ Arquivo [`deploy/nginx/coletta.conf`](deploy/nginx/coletta.conf):
 
 - Porta 80 só responde à validação do Let's Encrypt; todo o resto recebe **301 para HTTPS**
   ([linha 17](deploy/nginx/coletta.conf#L17)).
-- Apenas **TLS 1.2 e 1.3** ([linha 33](deploy/nginx/coletta.conf#L33)); no TLS 1.2, só cifras ECDHE com
+- Apenas **TLS 1.2 e 1.3** ([linha 34](deploy/nginx/coletta.conf#L34)); no TLS 1.2, só cifras ECDHE com
   AEAD (AES-GCM e ChaCha20).
 - **Troca de chaves pós-quântica:** `ssl_ecdh_curve X25519MLKEM768:X25519:prime256v1:secp384r1`
-  ([linha 35](deploy/nginx/coletta.conf#L35)). O grupo híbrido X25519 + ML-KEM-768 é oferecido primeiro;
+  ([linha 36](deploy/nginx/coletta.conf#L36)). O grupo híbrido X25519 + ML-KEM-768 é oferecido primeiro;
   os clássicos ficam como alternativa para clientes antigos. Funciona com o OpenSSL 3.5 do Ubuntu 26.04.
 - HSTS (`max-age=31536000`) em todas as respostas, inclusive arquivos estáticos.
 - `server_tokens off` (não expõe a versão do Nginx).
@@ -367,7 +469,7 @@ flowchart TD
 
     subgraph CI["Job 1 · Testes e verificações"]
         B["Python 3.14 + dependências<br/>(uv)"] --> C["check --deploy<br/>qualquer aviso reprova"]
-        C --> T["43 testes automatizados"]
+        C --> T["77 testes automatizados"]
         T --> P["pip-audit<br/>vulnerabilidade conhecida reprova"]
     end
 
@@ -460,15 +562,20 @@ As capturas ficam em [`docs/evidencias/`](docs/evidencias/).
 - **HSTS no Nginx, não no Django:** o Nginx envia HSTS em todas as respostas. No Django, o
   `check --deploy` exigiria `includeSubDomains` e `preload`, que não se aplicam a um endereço IP; por isso
   o aviso `security.W004` foi silenciado, com a justificativa registrada em
-  [`config/settings.py#L233`](config/settings.py#L233).
+  [`config/settings.py#L240`](config/settings.py#L240).
 - **Certificado de 6 dias:** exigência da Let's Encrypt para IPs; depende da renovação automática.
 - **CSP em desenvolvimento:** com `DEBUG=True` a CSP só registra violações (as páginas de erro do modo
   debug usam estilo inline); em produção ela bloqueia.
 - **Debian x Ubuntu:** a Oracle Cloud não oferece imagem oficial do Debian; foi usado o Ubuntu Server LTS.
 - **Rate limit do cadastro** usa cache em arquivo, compartilhado entre os workers do Gunicorn de um único
   servidor.
-- **Fora do escopo da v1:** recuperação de senha por e-mail, imagens de capa e de itens, compartilhamento
-  público e mover itens entre coleções.
+- **Pillow 13.0 e não 12.3:** a regra do projeto é preferir versões com pelo menos duas semanas de
+  lançamento, mas o `pip-audit` apontou mais de 30 CVEs na 12.3, algumas alcançáveis no nosso fluxo (parsers
+  de XBM e GIF executados durante o `Image.open`, EXIF lento em PNG), todas corrigidas na 13.0. Uma falha
+  conhecida pesa mais que o risco de uma versão recente; além disso, o `Image.open` foi restrito aos
+  formatos permitidos.
+- **Fora do escopo da v1:** recuperação de senha por e-mail, imagens nos itens (só a coleção tem capa),
+  compartilhamento público e mover itens entre coleções.
 
 ## 12. Checklist da entrega
 

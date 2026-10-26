@@ -181,7 +181,38 @@ Já feito:
   `items_this_month`, `last_collection`), avatar com iniciais (filtro `iniciais`), estrela nos `.eyebrow`,
   busca lavanda, painel do login com selo e cards inclinados. 43 testes.
 
-Próximo passo: decidir se as imagens (capa/itens) entram; capturas em `docs/evidencias/`.
+- **Capas das coleções** (decidido: só coleções, itens sem foto): campo `Collection.cover`; upload passa
+  sempre por `colecoes/images.py::process_cover` (só JPEG/PNG/WEBP via `Image.open(formats=...)`, 2 MB,
+  25 MP, regravado em WEBP 1600 px sem EXIF, nome `capas/<uuid>.webp`). `MEDIA_ROOT` = `MEDIA_DIR`
+  (produção: `/var/lib/coletta/media`), permissões 600/700, **sem MEDIA_URL**: servida só por
+  `collection_cover` (dono). Arquivo antigo apagado no `CollectionForm.save` e no `post_delete`. Pillow 13.0
+  mesmo sendo recente: a 12.3 tinha CVEs alcançáveis. 54 testes.
+
+- **Fase 9 (aplicação mais completa, a pedido da usuária, inspirada nas telas "Nova Coleção" e "Adicionar
+  Item" do Figma):** campos fixos novos (seção 6), campos personalizados por coleção (texto/número, até 10),
+  ficha do item (`/itens/<pk>/`), página de campos (`/colecoes/<pk>/campos/`), detalhe da coleção com resumo
+  por estado + filtros (`estado`, `edicao`) e ordenação (`ordem`: lista fechada `ITEM_ORDERINGS`),
+  formulários em duas colunas com breadcrumb, faixa da coleção e "continuar adicionando". Busca também em
+  tags e edição. A prévia ao vivo dos formulários foi descartada. 73 testes.
+
+- **Busca em tempo real** (pedido da usuária): `static/js/busca.js` (carregado com
+  `defer` no `app_base.html`) chama `/busca/?q=...&parcial=1`, que devolve `partials/search_live.html`
+  (até `LIVE_SEARCH_LIMIT = 5` coleções e 5 itens + total). Melhoria progressiva: sem JS o formulário
+  funciona igual. Setas navegam, Esc fecha.
+- **Filtros e exclusão em modal** (pedido da usuária): barra de filtros com selects em pílula, chips dos
+  filtros ativos (`active_filters`, cada um com link que remove só ele) e aplicação automática
+  (`static/js/filtros.js`, carregado pelo `{% block scripts %}`; sem JS aparece o botão Aplicar). Exclusões
+  abrem um `<dialog>` único no `app_base.html` (`static/js/confirmar.js`): links com `data-confirm`,
+  `data-confirm-text` e `data-confirm-button`; POST com CSRF para a mesma URL. As páginas
+  `*_confirm_delete.html` continuam como alternativa sem JS (não é exigência da disciplina ter página
+  própria, só a confirmação).
+- **Prévia da capa** (pedido da usuária): a área tracejada do formulário de coleção é o `<label>` do campo
+  de arquivo (input visualmente oculto, classe `cover-input`); `static/js/capa.js` mostra a prévia via
+  `URL.createObjectURL` e avisa formato/tamanho (o servidor valida de novo). Por isso a CSP tem
+  `img-src 'self' blob:` (só imagens). 77 testes.
+
+Próximo passo: publicar (migração 0003 renomeia `category` → `edition` preservando dados); capturas em
+`docs/evidencias/`.
 
 ### Estrutura esperada
 ```
@@ -205,13 +236,25 @@ coletta/
 `USERNAME_FIELD`), `name`, `is_active`, `is_staff`, `date_joined`. O manager normaliza o e-mail para
 minúsculas e `get_by_natural_key` usa `email__iexact`.
 
-**Collection:** `user` (FK → User, CASCADE, `related_name="collections"`), `name` (máx. 100), `description`
-(opcional, máx. 1000), `created_at`, `updated_at`. Ordenação: `-updated_at`.
+**Collection:** `user` (FK → User, CASCADE, `related_name="collections"`), `name` (máx. 100), `category`
+(obrigatória, `Collection.Category`: brinquedos, musica, fotografia, livros, jogos, arte, moedas, outros),
+`start_year` (opcional, 1900 até o ano atual), `tags` (texto normalizado `rara,anos-2000`; propriedade
+`tag_list`), `description` (opcional, máx. 1000), `cover` (opcional), `created_at`, `updated_at`.
+Ordenação: `-updated_at`.
 
 **CollectionItem:** `collection` (FK → Collection, CASCADE, `related_name="items"`), `name` (máx. 100),
-`description` (opcional, máx. 1000), `category` (opcional, máx. 60), `created_at`, `updated_at`.
+`edition` (subcategoria/edição, máx. 60; antes se chamava `category`, renomeado na migração 0003 sem perder
+dados), `year` (opcional), `condition` (`CollectionItem.Condition`: lacrado, excelente, bom, regular,
+danificado), `location` (local de guarda), `description` (rótulo "notas do colecionador"), datas.
 
-O item **não tem `user`**: pertence ao usuário por meio da coleção.
+**CollectionField** (campo personalizado): `collection` (FK, `related_name="custom_fields"`), `name`
+(máx. 40, único por coleção sem diferenciar caixa), `field_type` (texto/número; não muda depois de criado).
+Máximo `CollectionField.MAX_PER_COLLECTION = 10`.
+
+**ItemFieldValue:** `item` (FK, `related_name="field_values"`), `field` (FK), `value` (máx. 200; números
+guardados no formato brasileiro, ex.: `1500,5`). Único por (item, campo).
+
+Item, campo e valor **não têm `user`**: pertencem ao usuário por meio da coleção.
 
 ## 7. Regras de negócio
 
@@ -393,7 +436,7 @@ Seguir as fases do `PLANO.md`. Em resumo:
 O servidor e o pipeline vêm cedo de propósito: são o que mais pesa na nota e o que mais pode dar problema.
 
 ## 13. Decisões pendentes
-- Se as imagens entram na entrega.
+Nenhuma no momento.
 
 ## 14. Convenções para o Claude Code
 - Responder e comentar em **português do Brasil**; nomes de código (modelos, campos, funções) em inglês,
@@ -402,5 +445,7 @@ O servidor e o pipeline vêm cedo de propósito: são o que mais pesa na nota e 
 - Antes de adicionar uma dependência nova, perguntar e justificar; depois, atualizar o `requirements.txt`
   com `uv pip freeze > requirements.txt`.
 - Sempre usar o Python do `.venv` (uv), nunca o do sistema.
-- Toda view nova que lide com coleções ou itens deve seguir as regras de isolamento da seção 8.
+- Toda view nova que lide com coleções, itens ou campos deve seguir as regras de isolamento da seção 8
+  (helpers `_get_own_collection`, `_get_own_item`, `_get_own_field` em `colecoes/views.py`).
+- O README cita código por `arquivo#Lnn`: ao mudar um arquivo citado, recalcular e conferir as linhas.
 - Não ampliar o escopo além da v1 sem pedido explícito.

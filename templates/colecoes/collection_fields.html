@@ -1,0 +1,75 @@
+{% extends "app_base.html" %}
+
+{% block title %}Campos de {{ collection.name }}{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb" aria-label="Você está em">
+  <ol>
+    <li><a href="{% url 'collection_list' %}">Minhas coleções</a></li>
+    <li><a href="{% url 'collection_detail' collection.pk %}">{{ collection.name }}</a></li>
+    <li aria-current="page">Campos personalizados</li>
+  </ol>
+</nav>
+
+<header class="page-header">
+  <p class="eyebrow">Campos personalizados</p>
+  <h1>Campos de “{{ collection.name }}”</h1>
+  <p class="page-subtitle">Crie campos próprios para esta coleção. Eles aparecem no cadastro e na ficha de todos os itens dela.</p>
+</header>
+
+<div class="layout-2col">
+  <section class="form-card">
+    <div class="side-card-header">
+      <h2 class="card-title">Campos desta coleção</h2>
+      <span class="badge">{{ fields|length }} / {{ max_fields }}</span>
+    </div>
+    {% if fields %}
+      <ul class="field-list">
+        {% for field in fields %}
+        <li class="field-row">
+          <div>
+            <strong>{{ field.name }}</strong>
+            <span class="meta">{{ field.get_field_type_display }} · preenchido em {{ field.filled }} {{ field.filled|pluralize:"item,itens" }}</span>
+          </div>
+          <span class="card-actions">
+            <a class="icon-btn" href="{% url 'field_update' field.pk %}" aria-label="Renomear {{ field.name }}" title="Renomear">{% include "partials/icon.html" with name="edit" %}</a>
+            <a class="icon-btn icon-btn--danger" href="{% url 'field_delete' field.pk %}" data-confirm="Excluir o campo “{{ field.name }}”?" data-confirm-text="{% if field.filled %}{{ field.filled }} {{ field.filled|pluralize:"item tem,itens têm" }} este campo preenchido, e os valores serão apagados.{% else %}Nenhum item preencheu este campo ainda.{% endif %} Esta ação não pode ser desfeita." data-confirm-button="Excluir campo" aria-label="Excluir {{ field.name }}" title="Excluir">{% include "partials/icon.html" with name="trash" %}</a>
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="empty-state empty-state--inline">
+        <span class="empty-state-icon">{% include "partials/icon.html" with name="sliders" %}</span>
+        <h2>Nenhum campo ainda</h2>
+        <p>Use o formulário ao lado para criar o primeiro.</p>
+      </div>
+    {% endif %}
+    <a class="back-link back-link--bottom" href="{% url 'collection_detail' collection.pk %}">
+      {% include "partials/icon.html" with name="arrow-left" %} Voltar para a coleção
+    </a>
+  </section>
+
+  <aside class="side-column">
+    <form method="post" class="form side-card" novalidate>
+      {% csrf_token %}
+      <h2>Novo campo</h2>
+      {% include "partials/form_errors.html" %}
+      {% include "partials/field.html" with field=form.name %}
+      {% include "partials/field.html" with field=form.field_type %}
+      <button type="submit" class="btn btn-primary btn-block">
+        {% include "partials/icon.html" with name="plus" %} Adicionar campo
+      </button>
+    </form>
+
+    <section class="tip-card">
+      <span class="tip-icon">{% include "partials/icon.html" with name="bulb" %}</span>
+      <div>
+        <h2>Ideias de campos</h2>
+        <p>Discos: Gravadora, Rotação. Câmeras: Montagem da lente, Formato do filme. Bonecas: Linha, Tiragem.
+           Moedas: País, Valor de face.</p>
+      </div>
+    </section>
+  </aside>
+</div>
+{% endblock %}

@@ -180,6 +180,12 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 # Destino do collectstatic, servido pelo Nginx em produção
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Capas das coleções: fora da pasta pública e nunca servidas diretamente pelo Nginx
+# (sem MEDIA_URL de propósito; o acesso passa por colecoes.views.collection_cover, que confere o dono)
+MEDIA_ROOT = Path(os.environ.get('MEDIA_DIR', BASE_DIR / 'media'))
+FILE_UPLOAD_PERMISSIONS = 0o600
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o700
+
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
@@ -209,7 +215,8 @@ CSP_POLICY = {
     'default-src': [CSP.SELF],
     'script-src': [CSP.SELF],
     'style-src': [CSP.SELF],
-    'img-src': [CSP.SELF],
+    # blob: só para imagens: a prévia da capa escolhida, gerada no navegador antes do envio (static/js/capa.js)
+    'img-src': [CSP.SELF, 'blob:'],
     'font-src': [CSP.SELF],
     'connect-src': [CSP.SELF],
     'form-action': [CSP.SELF],
