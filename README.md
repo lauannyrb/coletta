@@ -278,7 +278,7 @@ Ran 7 tests ... OK
   ([`accounts/models.py#L52`](accounts/models.py#L52)) e validado no cadastro
   ([`accounts/forms.py#L23`](accounts/forms.py#L23)).
 - **Sessão:** `login()` gera uma nova chave de sessão; a sessão expira em 8 horas, com cookie `HttpOnly`
-  e `Secure` ([`config/settings.py#L206`](config/settings.py#L206)).
+  e `Secure` ([`config/settings.py#L217`](config/settings.py#L217)).
 - **Logout:** só por POST com token CSRF ([`accounts/urls.py#L17`](accounts/urls.py#L17)); um GET em
   `/sair/` recebe 405.
 - Não há usuário padrão nem credencial fixa no código.
@@ -297,7 +297,7 @@ Ran 7 tests ... OK
 - **Entrada de dados:** todos os dados passam por `Form`/`ModelForm`, que validam tipo, campos
   obrigatórios, espaços e tamanho máximo antes de chegar ao banco.
 - **XSS:** os templates do Django escapam automaticamente qualquer conteúdo vindo do usuário. Além disso,
-  a **Content Security Policy** ([`config/settings.py#L214`](config/settings.py#L214)) só permite scripts,
+  a **Content Security Policy** ([`config/settings.py#L225`](config/settings.py#L225)) só permite scripts,
   estilos e fontes do próprio servidor: mesmo que algum HTML fosse injetado, um script inline ou externo
   não seria executado. Os templates não têm nenhum JavaScript nem CSS inline.
   A única exceção é `blob:` em `img-src`, **só para imagens**: é o endereço temporário da prévia da capa
@@ -343,7 +343,7 @@ grande demais, dimensões gigantes, remoção do EXIF, acesso por outro usuário
 
 - `SECRET_KEY` só existe no `.env` (o Django não sobe sem ela) e `DEBUG` é `False` se não for
   explicitamente ligado ([`config/settings.py#L31`](config/settings.py#L31)).
-- Em produção ([`config/settings.py#L232`](config/settings.py#L232)): redirecionamento para HTTPS,
+- Em produção ([`config/settings.py#L243`](config/settings.py#L243)): redirecionamento para HTTPS,
   cookies `Secure`, `CSRF_TRUSTED_ORIGINS` e CSP aplicada.
 - Cabeçalhos enviados: `Content-Security-Policy`, `Strict-Transport-Security` (pelo Nginx),
   `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin` e
@@ -365,7 +365,7 @@ grande demais, dimensões gigantes, remoção do EXIF, acesso por outro usuário
 
 ### A09 – Security Logging and Alerting Failures
 
-Configuração em [`config/settings.py#L251`](config/settings.py#L251). Os logs vão para o journal do
+Configuração em [`config/settings.py#L262`](config/settings.py#L262). Os logs vão para o journal do
 systemd no servidor (`journalctl -u coletta.service`):
 
 - **django-axes:** cada falha de login e cada bloqueio, com IP de origem (o e-mail tentado é mascarado).
@@ -551,6 +551,10 @@ Exemplos em que a IA ajudou na segurança:
   reiniciar o serviço.
 - **Diagnóstico da CSP:** erros de fonte bloqueada no navegador foram identificados como recursos
   injetados por extensões (confirmado em janela anônima), e não como falha do site.
+- **Permissões de arquivo por destino:** a primeira versão das capas definia `FILE_UPLOAD_PERMISSIONS = 0o600`
+  de forma global. Como o `collectstatic` também usa essa configuração, o CSS publicado ficou ilegível para
+  o Nginx (`www-data`) e o site perdeu o estilo em produção. A correção foi definir as permissões por destino
+  em `STORAGES`: capas com `600/700` (só a aplicação lê) e arquivos estáticos com `644/755` (o Nginx serve).
 - **Acessibilidade:** o contraste das cores do protótipo foi medido; o texto secundário reprovava no
   WCAG AA e foi escurecido.
 
@@ -573,7 +577,7 @@ As capturas ficam em [`docs/evidencias/`](docs/evidencias/).
 - **HSTS no Nginx, não no Django:** o Nginx envia HSTS em todas as respostas. No Django, o
   `check --deploy` exigiria `includeSubDomains` e `preload`, que não se aplicam a um endereço IP; por isso
   o aviso `security.W004` foi silenciado, com a justificativa registrada em
-  [`config/settings.py#L240`](config/settings.py#L240).
+  [`config/settings.py#L251`](config/settings.py#L251).
 - **Certificado de 6 dias:** exigência da Let's Encrypt para IPs; depende da renovação automática.
 - **CSP em desenvolvimento:** com `DEBUG=True` a CSP só registra violações (as páginas de erro do modo
   debug usam estilo inline); em produção ela bloqueia.

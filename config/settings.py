@@ -183,8 +183,19 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # Capas das coleções: fora da pasta pública e nunca servidas diretamente pelo Nginx
 # (sem MEDIA_URL de propósito; o acesso passa por colecoes.views.collection_cover, que confere o dono)
 MEDIA_ROOT = Path(os.environ.get('MEDIA_DIR', BASE_DIR / 'media'))
-FILE_UPLOAD_PERMISSIONS = 0o600
-FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o700
+
+# Permissões por destino (não globais): as capas só podem ser lidas pelo usuário da aplicação;
+# os arquivos estáticos precisam ser legíveis pelo Nginx (www-data), que os serve direto.
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        'OPTIONS': {'file_permissions_mode': 0o600, 'directory_permissions_mode': 0o700},
+    },
+    'staticfiles': {
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        'OPTIONS': {'file_permissions_mode': 0o644, 'directory_permissions_mode': 0o755},
+    },
+}
 
 
 # Email

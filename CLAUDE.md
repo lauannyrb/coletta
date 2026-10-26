@@ -184,7 +184,8 @@ Já feito:
 - **Capas das coleções** (decidido: só coleções, itens sem foto): campo `Collection.cover`; upload passa
   sempre por `colecoes/images.py::process_cover` (só JPEG/PNG/WEBP via `Image.open(formats=...)`, 2 MB,
   25 MP, regravado em WEBP 1600 px sem EXIF, nome `capas/<uuid>.webp`). `MEDIA_ROOT` = `MEDIA_DIR`
-  (produção: `/var/lib/coletta/media`), permissões 600/700, **sem MEDIA_URL**: servida só por
+  (produção: `/var/lib/coletta/media`), permissões 600/700 **só no storage `default`** (em `STORAGES`; o
+  `staticfiles` usa 644/755, senão o Nginx não lê o CSS: nunca usar `FILE_UPLOAD_PERMISSIONS` global), **sem MEDIA_URL**: servida só por
   `collection_cover` (dono). Arquivo antigo apagado no `CollectionForm.save` e no `post_delete`. Pillow 13.0
   mesmo sendo recente: a 12.3 tinha CVEs alcançáveis. 54 testes.
 
