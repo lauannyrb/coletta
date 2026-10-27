@@ -225,6 +225,10 @@ Já feito:
   `_item_form_return` só aceita cadastro/edição de item da mesma coleção (sem open redirect) e a página de
   campos mostra "Voltar ao item". `static/js/rascunho.js` guarda o formulário de item na `sessionStorage`
   (`data-draft`, só quando o form não veio do servidor com erro) e restaura ao voltar. 86 testes.
+- **Responsividade revisada** (2026-10-26): todas as telas varridas em 320/375/768/900/1024 px sem estouro
+  horizontal. Menu no topo até 900 px (tablets); cabeçalhos com ações quebram linha quando não cabem;
+  até 480 px: botões de formulário/confirmação em largura total (ação principal em cima) e a busca sem o
+  botão "Buscar" (Enter e busca ao vivo).
 
 Publicado e conferido em produção em 2026-10-26 (capas gravadas em `/var/lib/coletta/media/capas` com 600/700;
 Nginx com `client_max_body_size 3m`). Checagem final contra o escopo feita em 2026-10-26 (Fase 10 do `PLANO.md`): falta só o que depende da
