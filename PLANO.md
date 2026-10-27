@@ -138,6 +138,9 @@ Varredura comparando o projeto com o escopo oficial da disciplina (checklist de 
 - [x] 2FA ativo na conta do GitHub (app autenticador + códigos de recuperação; `github-2fa.png`)
 - [x] Servidor: `diff` do `coletta-deploy` sem diferenças
 - [x] Renovação testada: `certbot renew --dry-run` OK e `snap.certbot.renew.timer` ativo (`certbot-renovacao.png`)
-- [ ] Antes de entregar: se a data passar de 01/11, abrir o site e conferir o cadeado
+- [x] Antes de entregar: se a data passar de 01/11, abrir o site e conferir o cadeado (renovação automática
+      conferida; certificado atual válido de 25/10 a 01/11)
+- [x] Varredura final (2026-10-27): `main` sincronizada com o GitHub, último deploy verde, 86 testes OK,
+      `check --deploy` sem avisos, cabeçalhos e redirecionamentos em produção OK, linhas do README conferidas
 - [x] Commit final com as evidências e `git push` (`f36d3eb`: pipeline verde, imagens publicadas no GitHub)
 
