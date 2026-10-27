@@ -586,12 +586,15 @@ As capturas ficam em [`docs/evidencias/`](docs/evidencias/).
 | SSL.org: certificado confiável, assinatura e chave | ![SSL.org](docs/evidencias/ssl-org.jpg) |
 | SSL.org: cadeia de certificados | ![SSL.org cadeia](docs/evidencias/ssl-org-cadeia.jpg) |
 | DigiCert PQC checker: Pass | ![DigiCert](docs/evidencias/digicert-pqc.png) |
+| Renovação automática do certificado: `certbot renew --dry-run` e timer ativo | ![Certbot](docs/evidencias/certbot-renovacao.png) |
 | Fail2Ban com IP banido | ![Fail2Ban](docs/evidencias/fail2ban-ban.png) |
 | SSH só com chave: tentativa de outro aparelho recusada (`Permission denied (publickey)`) | ![SSH](docs/evidencias/ssh-somente-chave.png) |
+| Conta do GitHub com 2FA (app autenticador) e códigos de recuperação | ![2FA](docs/evidencias/github-2fa.png) |
 | Pipeline do GitHub Actions verde | ![Pipeline](docs/evidencias/pipeline.png) |
 | Execução do pipeline: testes e deploy | ![Execução](docs/evidencias/pipeline-run.png) |
 | Passos do deploy (incluindo apagar a chave do runner) | ![Deploy](docs/evidencias/pipeline-deploy.png) |
 | Tela de login | ![Login](docs/evidencias/tela-login.png) |
+| Isolamento (A01): segunda conta abrindo `/colecoes/3/`, que pertence a outra conta, recebe 404 | ![Isolamento](docs/evidencias/isolamento-404.png) |
 | Tela inicial em produção (página interna, após o login) | ![Início](docs/evidencias/tela-inicio.png) |
 | Minhas coleções em produção (com capas) | ![Minhas coleções](docs/evidencias/tela-colecoes.png) |
 

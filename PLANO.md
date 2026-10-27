@@ -89,7 +89,7 @@ pelo deploy automático. Assim, problemas de infraestrutura aparecem com tempo p
 - [x] `/admin/` só existe com `DEBUG=True`
 - [x] `check --deploy` sem avisos; `--fail-level WARNING` no workflow e no `deploy/coletta-deploy`
 - [x] Conferir os cabeçalhos em produção (2026-10-26: CSP, HSTS, X-Frame-Options, nosniff, cookies `Secure`)
-- [ ] Reinstalar `/usr/local/bin/coletta-deploy` se diferir do repositório (ver Fase 10)
+- [x] `/usr/local/bin/coletta-deploy` igual ao do repositório (conferido com `diff` em 2026-10-26)
 
 ## Fase 7 — README (relatório técnico)
 - [x] Visão geral, stack e arquitetura
@@ -97,7 +97,7 @@ pelo deploy automático. Assim, problemas de infraestrutura aparecem com tempo p
 - [x] OWASP Top 10:2025: categorias mitigadas, com arquivo e linha de cada uma
 - [x] Demonstração do teste de acesso cruzado (404)
 - [x] Como rodar localmente
-- [ ] Capturas em `docs/evidencias/` e 2FA do GitHub: ver Fase 10
+- [x] Capturas em `docs/evidencias/` (2FA do GitHub: ver Fase 10)
 
 ## Fase 8 — Visual e extras
 - [x] Ajuste visual fiel ao protótipo do Figma (totais com detalhes reais, avatar, busca lavanda, painel do login)
@@ -132,10 +132,11 @@ Varredura comparando o projeto com o escopo oficial da disciplina (checklist de 
 - [x] Salvar as 7 capturas em `docs/evidencias/` com os nomes que o README usa (hoje as imagens aparecem
       quebradas no GitHub): `ssl-org.jpg` ✔, `ssl-org-cadeia.jpg` ✔, `digicert-pqc.png` ✔, `fail2ban-ban.png` ✔,
       `pipeline.png` ✔, `tela-login.png` ✔, `tela-inicio.png` ✔ (extras ✔: `tela-colecoes.png`, ✔: `ssh-somente-chave.png`, `pipeline-run.png`, `pipeline-deploy.png`)
-- [ ] Opcional, mas reforça A01 e a renovação: `isolamento-404.png` (conta B abrindo coleção da conta A) e
+- [x] Opcional, mas reforça A01 e a renovação: `isolamento-404.png` (conta B abrindo coleção da conta A) e
       `certbot-renovacao.png` (`sudo certbot renew --dry-run` + `systemctl list-timers | grep certbot`)
-- [ ] Confirmar o 2FA na conta do GitHub (o README afirma que está ativo)
-- [ ] Servidor: `diff /usr/local/bin/coletta-deploy /srv/coletta/app/deploy/coletta-deploy`; se diferir, reinstalar
-- [ ] Antes de entregar: se a data passar de 01/11, conferir que o certificado foi renovado (`curl -vI` ou o navegador)
-- [ ] Commit final com as evidências e `git push`; conferir o pipeline verde e o README renderizado no GitHub
+- [x] 2FA ativo na conta do GitHub (app autenticador + códigos de recuperação; `github-2fa.png`)
+- [x] Servidor: `diff` do `coletta-deploy` sem diferenças
+- [x] Renovação testada: `certbot renew --dry-run` OK e `snap.certbot.renew.timer` ativo (`certbot-renovacao.png`)
+- [ ] Antes de entregar: se a data passar de 01/11, abrir o site e conferir o cadeado
+- [x] Commit final com as evidências e `git push` (`f36d3eb`: pipeline verde, imagens publicadas no GitHub)
 
