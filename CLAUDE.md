@@ -90,7 +90,8 @@ lavanda = 3.92:1 (**reprova**), usar texto secundário só sobre branco/fundo ou
 - Início: "Sincronizado", sino de notificações, "Plano Curador", selo "Ativa", atalho ⌘K, banner de dica
   sobre fotos, logo e usuário repetidos. "4 categorias" e "+3 este mês" ficam para depois.
 - Cards de coleção sem foto (imagens adiadas): usar o card com a estrela do Brand Guide.
-- Sair: botão com texto "Sair" dentro de formulário POST, não só ícone.
+- Sair: botão dentro de formulário POST. A pedido da usuária segue o bloco "Aside" do Figma (só o ícone visível,
+  com texto "Sair" para leitores de tela e na dica `title`), no cartão lavanda com iniciais e total de coleções.
 - Faltam no Figma: estado vazio do Início (RN30), versão mobile e as demais telas (seguir o Brand Guide).
 
 ## 4. Stack e decisões tomadas
@@ -218,7 +219,12 @@ Já feito:
   ("Selecione uma categoria"), senão o padrão `outros` passava sem escolha.
 - **Seed de demonstração:** `manage.py seed_demo [--reset]` (só com `DEBUG=True`; senhas aleatórias
   mostradas no terminal; contas `@demo.coletta.local`: Ana com 7 coleções/29 itens/capas e Bia com 1
-  coleção para o teste de 404). 81 testes.
+  coleção para o teste de 404).
+- **Saudação e rascunho** (pedido da usuária): Início mostra os dois primeiros nomes (filtro `primeiros_nomes`,
+  partículas como "da" ficam junto). "Gerenciar campos" no formulário de item leva `?voltar=<caminho>`;
+  `_item_form_return` só aceita cadastro/edição de item da mesma coleção (sem open redirect) e a página de
+  campos mostra "Voltar ao item". `static/js/rascunho.js` guarda o formulário de item na `sessionStorage`
+  (`data-draft`, só quando o form não veio do servidor com erro) e restaura ao voltar. 86 testes.
 
 Publicado e conferido em produção em 2026-10-26 (capas gravadas em `/var/lib/coletta/media/capas` com 600/700;
 Nginx com `client_max_body_size 3m`). Checagem final contra o escopo feita em 2026-10-26 (Fase 10 do `PLANO.md`): falta só o que depende da

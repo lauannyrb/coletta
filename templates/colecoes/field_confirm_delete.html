@@ -3,7 +3,7 @@
 {% block title %}Excluir campo{% endblock %}
 
 {% block content %}
-<a class="back-link" href="{% url 'collection_fields' collection.pk %}">
+<a class="back-link" href="{{ fields_url }}">
   {% include "partials/icon.html" with name="arrow-left" %}
   Campos personalizados
 </a>
@@ -24,7 +24,7 @@
   </div>
   <form method="post" class="form-actions">
     {% csrf_token %}
-    <a class="btn btn-secondary" href="{% url 'collection_fields' collection.pk %}">Cancelar</a>
+    <a class="btn btn-secondary" href="{{ fields_url }}">Cancelar</a>
     <button type="submit" class="btn btn-danger">
       {% include "partials/icon.html" with name="trash" %}
       Excluir campo

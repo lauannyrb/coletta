@@ -11,6 +11,14 @@
   </ol>
 </nav>
 
+{% if return_url %}
+<div class="return-banner">
+  {% include "partials/icon.html" with name="edit" %}
+  <p>Você veio do cadastro de um item. O que já tinha preenchido continua guardado.</p>
+  <a class="btn btn-primary btn-sm" href="{{ return_url }}">{% include "partials/icon.html" with name="arrow-left" %} Voltar ao item</a>
+</div>
+{% endif %}
+
 <header class="page-header">
   <p class="eyebrow">Campos personalizados</p>
   <h1>Campos de “{{ collection.name }}”</h1>
@@ -32,8 +40,8 @@
             <span class="meta">{{ field.get_field_type_display }} · preenchido em {{ field.filled }} {{ field.filled|pluralize:"item,itens" }}</span>
           </div>
           <span class="card-actions">
-            <a class="icon-btn" href="{% url 'field_update' field.pk %}" aria-label="Renomear {{ field.name }}" title="Renomear">{% include "partials/icon.html" with name="edit" %}</a>
-            <a class="icon-btn icon-btn--danger" href="{% url 'field_delete' field.pk %}" data-confirm="Excluir campo" data-confirm-name="{{ field.name }}" data-confirm-text="{% if field.filled %}{{ field.filled }} {{ field.filled|pluralize:"item tem,itens têm" }} este campo preenchido, e os valores serão apagados.{% else %}Nenhum item preencheu este campo ainda.{% endif %}" data-confirm-button="Excluir campo" aria-label="Excluir {{ field.name }}" title="Excluir">{% include "partials/icon.html" with name="trash" %}</a>
+            <a class="icon-btn" href="{% url 'field_update' field.pk %}{{ return_query }}" aria-label="Renomear {{ field.name }}" title="Renomear">{% include "partials/icon.html" with name="edit" %}</a>
+            <a class="icon-btn icon-btn--danger" href="{% url 'field_delete' field.pk %}{{ return_query }}" data-confirm="Excluir campo" data-confirm-name="{{ field.name }}" data-confirm-text="{% if field.filled %}{{ field.filled }} {{ field.filled|pluralize:"item tem,itens têm" }} este campo preenchido, e os valores serão apagados.{% else %}Nenhum item preencheu este campo ainda.{% endif %}" data-confirm-button="Excluir campo" aria-label="Excluir {{ field.name }}" title="Excluir">{% include "partials/icon.html" with name="trash" %}</a>
           </span>
         </li>
         {% endfor %}
@@ -45,9 +53,15 @@
         <p>Use o formulário ao lado para criar o primeiro.</p>
       </div>
     {% endif %}
-    <a class="back-link back-link--bottom" href="{% url 'collection_detail' collection.pk %}">
-      {% include "partials/icon.html" with name="arrow-left" %} Voltar para a coleção
-    </a>
+    {% if return_url %}
+      <a class="back-link back-link--bottom" href="{{ return_url }}">
+        {% include "partials/icon.html" with name="arrow-left" %} Voltar ao item
+      </a>
+    {% else %}
+      <a class="back-link back-link--bottom" href="{% url 'collection_detail' collection.pk %}">
+        {% include "partials/icon.html" with name="arrow-left" %} Voltar para a coleção
+      </a>
+    {% endif %}
   </section>
 
   <aside class="side-column">

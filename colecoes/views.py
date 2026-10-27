@@ -1,4 +1,4 @@
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -6,7 +6,7 @@ from django.db.models import Count, F, Q
 from django.db.models.functions import Lower
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
+from django.urls import Resolver404, resolve, reverse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
@@ -49,6 +49,32 @@ def _get_own_field(request, pk):
         pk=pk,
         collection__user=request.user,
     )
+
+
+def _item_form_return(request, collection):
+    """Endereço do formulário de item de onde a pessoa veio (?voltar=), para o botão "Voltar ao item".
+
+    Só aceita o cadastro ou a edição de item DESTA coleção (do dono): qualquer outro valor é ignorado,
+    o que impede usar o parâmetro para mandar alguém a um site externo (open redirect).
+    """
+    url = request.GET.get('voltar', '')
+    if not url.startswith('/') or url.startswith('//'):
+        return ''
+    path = urlsplit(url).path
+    try:
+        match = resolve(path)
+    except Resolver404:
+        return ''
+    if match.url_name == 'item_create' and match.kwargs.get('collection_pk') == collection.pk:
+        return path
+    if match.url_name == 'item_update' and collection.items.filter(pk=match.kwargs.get('pk')).exists():
+        return path
+    return ''
+
+
+def _fields_url(collection, return_url):
+    url = reverse('collection_fields', args=[collection.pk])
+    return f'{url}?{urlencode({"voltar": return_url})}' if return_url else url
 
 
 def _touch(collection):
@@ -192,16 +218,19 @@ def collection_delete(request, pk):
 @require_http_methods(['GET', 'POST'])
 def collection_fields(request, pk):
     collection = _get_own_collection(request, pk)
+    return_url = _item_form_return(request, collection)
     form = CollectionFieldForm(request.POST or None, collection=collection)
     if request.method == 'POST' and form.is_valid():
         field = form.save()
         messages.success(request, f'Campo “{field.name}” adicionado aos itens desta coleção.')
-        return redirect('collection_fields', pk=collection.pk)
+        return redirect(_fields_url(collection, return_url))
     return render(request, 'colecoes/collection_fields.html', {
         'collection': collection,
         'fields': collection.custom_fields.annotate(filled=Count('values')),
         'form': form,
         'max_fields': CollectionField.MAX_PER_COLLECTION,
+        'return_url': return_url,
+        'return_query': f'?{urlencode({"voltar": return_url})}' if return_url else '',
     })
 
 
@@ -209,15 +238,17 @@ def collection_fields(request, pk):
 @require_http_methods(['GET', 'POST'])
 def field_update(request, pk):
     field = _get_own_field(request, pk)
+    fields_url = _fields_url(field.collection, _item_form_return(request, field.collection))
     form = CollectionFieldForm(request.POST or None, instance=field, collection=field.collection)
     if request.method == 'POST' and form.is_valid():
         form.save()
         messages.success(request, 'Campo renomeado.')
-        return redirect('collection_fields', pk=field.collection.pk)
+        return redirect(fields_url)
     return render(request, 'colecoes/field_form.html', {
         'form': form,
         'field': field,
         'collection': field.collection,
+        'fields_url': fields_url,
     })
 
 
@@ -226,15 +257,17 @@ def field_update(request, pk):
 def field_delete(request, pk):
     field = _get_own_field(request, pk)
     collection = field.collection
+    fields_url = _fields_url(collection, _item_form_return(request, collection))
     if request.method == 'POST':
         name = field.name
         field.delete()  # CASCADE remove os valores preenchidos nos itens
         messages.success(request, f'Campo “{name}” excluído.')
-        return redirect('collection_fields', pk=collection.pk)
+        return redirect(fields_url)
     return render(request, 'colecoes/field_confirm_delete.html', {
         'field': field,
         'collection': collection,
         'filled': field.values.count(),
+        'fields_url': fields_url,
     })
 
 

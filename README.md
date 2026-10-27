@@ -64,7 +64,7 @@ componentes do *brand guide*).
 |---|---|
 | Linguagem | Python 3.14 (gerenciado com [uv](https://docs.astral.sh/uv/)) |
 | Framework | Django 6.1 (templates renderizados no servidor) |
-| Front-end | HTML + CSS puro; cinco scripts próprios e pequenos em `static/js/` (busca em tempo real, filtros automáticos, modal de exclusão, prévia da capa e validação antes do envio), todos opcionais (sem JS tudo funciona); nada de CDN |
+| Front-end | HTML + CSS puro; seis scripts próprios e pequenos em `static/js/` (busca em tempo real, filtros automáticos, modal de exclusão, prévia da capa, validação antes do envio e rascunho do formulário de item), todos opcionais (sem JS tudo funciona); nada de CDN |
 | Banco de dados | SQLite |
 | Limite de tentativas de login | django-axes 8.3 |
 | Processamento das capas | Pillow 13.0 |
@@ -180,7 +180,7 @@ No `.env`, gere uma `SECRET_KEY` própria e, para desenvolvimento, use `DEBUG=Tr
 .venv/bin/python -c "from django.core.management.utils import get_random_secret_key as g; print(g())"
 ```
 
-Testes (81 testes automatizados):
+Testes (86 testes automatizados):
 
 ```bash
 .venv/bin/python manage.py test
@@ -224,15 +224,18 @@ O principal risco de um sistema multiusuário é um usuário acessar dados de ou
 - Itens são buscados pela coleção do dono — [`colecoes/views.py#L38`](colecoes/views.py#L38):
   `get_object_or_404(CollectionItem, pk=pk, collection__user=request.user)`.
 - Ao criar um item, a coleção de destino também passa pela verificação de dono
-  ([`colecoes/views.py#L253`](colecoes/views.py#L253)); o ID vindo do navegador nunca é confiado.
+  ([`colecoes/views.py#L286`](colecoes/views.py#L286)); o ID vindo do navegador nunca é confiado.
 - Listagens, totais e busca partem sempre do usuário logado
-  ([`colecoes/views.py#L305`](colecoes/views.py#L305)).
-- O dono é definido no servidor ([`colecoes/views.py#L88`](colecoes/views.py#L88)) e os formulários não
+  ([`colecoes/views.py#L338`](colecoes/views.py#L338)).
+- O dono é definido no servidor ([`colecoes/views.py#L114`](colecoes/views.py#L114)) e os formulários não
   têm campo `user` nem `collection` ([`colecoes/forms.py#L10`](colecoes/forms.py#L10)): um `user` forjado no
   POST é ignorado (há teste para isso).
 - Todas as views privadas usam `@login_required`.
 - Recurso de outro usuário responde **404**, idêntico ao de um ID inexistente, para não revelar se o
   registro existe.
+- **Volta ao formulário de item (`?voltar=`):** a página de campos aceita o endereço de volta só se ele for o
+  cadastro ou a edição de item **da mesma coleção do dono** ([`colecoes/views.py#L54`](colecoes/views.py#L54)); endereços externos
+  (`https://...`, `//...`, `javascript:`) ou de outras coleções são ignorados, o que impede *open redirect*.
 - **Campos personalizados** seguem a mesma regra: são buscados pela coleção do dono
   ([`colecoes/views.py#L46`](colecoes/views.py#L46)), e o formulário do item só monta os campos da coleção
   do próprio item ([`colecoes/forms.py#L132`](colecoes/forms.py#L132)). Um ID de campo de outra coleção
@@ -287,10 +290,10 @@ Ran 7 tests ... OK
 
 - **SQL:** todo acesso ao banco usa o ORM do Django, que gera consultas parametrizadas. Não existe SQL
   escrito à mão no projeto. A busca usa `icontains` em nome, edição e tags
-  ([`colecoes/views.py#L312`](colecoes/views.py#L312)), com o termo limitado a 100 caracteres.
+  ([`colecoes/views.py#L345`](colecoes/views.py#L345)), com o termo limitado a 100 caracteres.
 - **Parâmetros de filtro e ordenação:** na lista de itens, a ordenação vem de uma lista fechada
   ([`colecoes/views.py#L23`](colecoes/views.py#L23)) e o estado de conservação só é aceito se for um dos
-  valores conhecidos ([`colecoes/views.py#L101`](colecoes/views.py#L101)); qualquer outro valor é ignorado. O
+  valores conhecidos ([`colecoes/views.py#L127`](colecoes/views.py#L127)); qualquer outro valor é ignorado. O
   texto da URL nunca vira nome de coluna nem parte de consulta.
 - **Tags:** normalizadas e validadas no servidor ([`colecoes/forms.py#L16`](colecoes/forms.py#L16)): só
   letras, números e hífen, até 8 tags de 30 caracteres.
@@ -332,7 +335,7 @@ foi implementada com várias camadas de proteção ([`colecoes/images.py#L17`](c
 - **Fora da pasta pública:** os arquivos ficam em `/var/lib/coletta/media`, com permissão `600`
   ([`config/settings.py#L185`](config/settings.py#L185)). O Nginx não os serve; não existe URL pública.
 - **Acesso só pelo dono:** a imagem é entregue por uma view que usa a mesma verificação de dono das
-  coleções ([`colecoes/views.py#L165`](colecoes/views.py#L165)); para outro usuário, 404.
+  coleções ([`colecoes/views.py#L191`](colecoes/views.py#L191)); para outro usuário, 404.
 - **Limpeza:** a capa antiga é apagada do disco ao trocar, remover ou excluir a coleção
   ([`colecoes/models.py#L150`](colecoes/models.py#L150)).
 
@@ -480,7 +483,7 @@ flowchart TD
 
     subgraph CI["Job 1 · Testes e verificações"]
         B["Python 3.14 + dependências<br/>(uv)"] --> C["check --deploy<br/>qualquer aviso reprova"]
-        C --> T["81 testes automatizados"]
+        C --> T["86 testes automatizados"]
         T --> P["pip-audit<br/>vulnerabilidade conhecida reprova"]
     end
 

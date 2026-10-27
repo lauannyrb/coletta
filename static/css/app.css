@@ -314,23 +314,39 @@ a:hover { color: var(--color-primary-dark); }
   font-weight: 700;
 }
 
+/* Cartão do usuário (Figma, Aside): lavanda, iniciais, nome, total de coleções e o ícone de sair à direita */
 .sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: auto -8px 0;
+  padding: 8px 6px 8px 8px;
+  border-radius: var(--radius-sm);
+  background: #f6f2fd;
+}
+.sidebar-user form { flex-shrink: 0; }
+.sidebar-user-info { display: grid; gap: 1px; min-width: 0; }
+.sidebar-user-info strong,
+.sidebar-user-info span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar-user-info strong { font-size: 0.85rem; font-weight: 700; line-height: 1.4; color: var(--color-text); }
+.sidebar-user-info span { font-size: 0.75rem; font-weight: 600; color: var(--color-text-muted); }
+/* Sair: botão de verdade (POST); o texto "Sair" fica para leitores de tela e na dica (title) */
+.sidebar-logout {
   display: grid;
-  gap: 12px;
-  margin-top: auto;
-  padding: 14px;
-  border-radius: var(--radius-md);
-  background: var(--color-canvas);
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
 }
-.sidebar-user-info { display: grid; min-width: 0; }
-.sidebar-user-info span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.8125rem;
-  color: var(--color-text-muted);
-}
-.sidebar-user .btn { width: 100%; }
+.sidebar-logout .icon { width: 18px; height: 18px; }
+.sidebar-logout:hover { background: var(--color-danger-bg); color: var(--color-danger); }
+.sidebar-logout:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 1px; }
 
 .app-content { min-width: 0; }
 
@@ -511,15 +527,9 @@ a:hover { color: var(--color-primary-dark); }
     border-bottom: 1px solid var(--color-border);
   }
   .sidebar-nav { display: flex; order: 3; width: 100%; }
-  .sidebar-user {
-    display: flex;
-    align-items: center;
-    margin: 0 0 0 auto;
-    padding: 0;
-    background: none;
-  }
+  .sidebar-user { margin: 0 0 0 auto; padding: 0; background: none; }
   .sidebar-user-info { display: none; }
-  .sidebar-user .btn { width: auto; }
+  .sidebar-logout { width: 40px; height: 40px; border: 1px solid var(--color-border); background: var(--color-surface); }
   .app-main { padding: 28px 16px; }
 }
 
@@ -746,6 +756,28 @@ a:hover { color: var(--color-primary-dark); }
 
 .empty-state .btn { margin-top: 8px; }
 
+/* Aviso de rascunho recuperado (static/js/rascunho.js) e faixa "Voltar ao item" na página de campos */
+.draft-notice, .return-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-lavender);
+  color: var(--color-primary-dark);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.draft-notice[hidden], .return-banner[hidden] { display: none; }
+.draft-notice p, .return-banner p { flex: 1; margin: 0; }
+.draft-notice > .icon, .return-banner > .icon { flex-shrink: 0; color: var(--color-primary); }
+.draft-notice .btn { min-height: 32px; }
+.return-banner { margin-bottom: 20px; }
+.return-banner .btn { flex-shrink: 0; }
+@media (max-width: 560px) {
+  .return-banner { flex-wrap: wrap; }
+}
+
 /* Modal de exclusão (static/js/confirmar.js) */
 .modal {
   width: min(480px, calc(100% - 32px));
@@ -872,16 +904,16 @@ a:hover { color: var(--color-primary-dark); }
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--color-primary);
   color: #fff;
-  font-size: 0.875rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
 }
-.sidebar-user-id { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.sidebar-user-id { display: flex; flex: 1; align-items: center; gap: 8px; min-width: 0; }
 
 /* Contador do card com a barrinha do Figma */
 .collection-count::before {

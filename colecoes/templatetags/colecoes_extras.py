@@ -18,6 +18,26 @@ def ha_quanto_tempo(value):
     return f'há {timesince(value)}'
 
 
+PARTICULAS = {'da', 'das', 'de', 'do', 'dos', 'e'}
+
+
+@register.filter
+def primeiros_nomes(nome):
+    """'Lauanny Rodrigues Barreto' -> 'Lauanny Rodrigues'; 'Maria da Silva Lima' -> 'Maria da Silva'.
+
+    Partículas (da, de, dos...) não contam como nome: ficam junto do nome seguinte.
+    """
+    partes = (nome or '').split()
+    if not partes:
+        return ''
+    escolhidas = [partes[0]]
+    for parte in partes[1:]:
+        escolhidas.append(parte)
+        if parte.lower() not in PARTICULAS:
+            break
+    return ' '.join(escolhidas)
+
+
 @register.filter
 def iniciais(nome):
     """'Ana Beatriz Souza' -> 'AS' (primeiro e último nome) para o avatar."""

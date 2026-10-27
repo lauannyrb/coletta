@@ -22,19 +22,21 @@
     {% endwith %}
 
     <div class="sidebar-user">
-      <div class="sidebar-user-id">
+      <div class="sidebar-user-id" title="{{ user.name }} · {{ user.email }}">
         <span class="avatar" aria-hidden="true">{{ user.name|iniciais }}</span>
         <div class="sidebar-user-info">
-          <strong>{{ user.name }}</strong>
-          <span>{{ user.email }}</span>
+          <strong>{{ user.name|primeiros_nomes }}</strong>
+          {% with total=user.collections.count %}
+            <span>{% if total %}{{ total }} {{ total|pluralize:"coleção,coleções" }}{% else %}Nenhuma coleção ainda{% endif %}</span>
+          {% endwith %}
         </div>
       </div>
-      {# Logout por POST com CSRF; nunca por link GET #}
+      {# Logout por POST com CSRF; nunca por link GET. Só o ícone aparece, mas o texto "Sair" continua no botão #}
       <form method="post" action="{% url 'logout' %}">
         {% csrf_token %}
-        <button type="submit" class="btn btn-secondary btn-sm">
+        <button type="submit" class="sidebar-logout" title="Sair">
           {% include "partials/icon.html" with name="logout" %}
-          Sair
+          <span class="visually-hidden">Sair</span>
         </button>
       </form>
     </div>

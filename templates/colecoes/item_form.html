@@ -1,4 +1,5 @@
 {% extends "app_base.html" %}
+{% load static %}
 
 {% block title %}{% if item %}Editar item{% else %}Novo item{% endif %}{% endblock %}
 
@@ -18,7 +19,7 @@
 
 {% include "partials/collection_strip.html" %}
 
-<form method="post" class="layout-2col" novalidate data-validate>
+<form method="post" class="layout-2col" novalidate data-validate{% if not form.is_bound %} data-draft="item-{{ collection.pk }}-{{ item.pk|default:'novo' }}"{% endif %}>
   {% csrf_token %}
   <div class="form form-card">
     <header class="form-card-header">
@@ -26,6 +27,11 @@
       <p class="page-subtitle">Insira os dados essenciais e as particularidades para catalogar este exemplar no acervo.</p>
     </header>
 
+    <div class="draft-notice" data-draft-notice hidden>
+      {% include "partials/icon.html" with name="check" %}
+      <p>Recuperamos o que você já tinha preenchido.</p>
+      <button type="button" class="btn btn-ghost btn-sm" data-draft-discard>{% include "partials/icon.html" with name="x" %} Descartar</button>
+    </div>
     {% include "partials/form_errors.html" %}
     {% include "partials/field.html" with field=form.name %}
     <div class="form-row">
@@ -58,7 +64,7 @@
     {% endif %}
 
     <div class="form-actions form-actions--wide">
-      <a class="btn btn-secondary" href="{% if item %}{% url 'item_detail' item.pk %}{% else %}{% url 'collection_detail' collection.pk %}{% endif %}">Cancelar</a>
+      <a class="btn btn-secondary" href="{% if item %}{% url 'item_detail' item.pk %}{% else %}{% url 'collection_detail' collection.pk %}{% endif %}" data-draft-discard-link>Cancelar</a>
       <button type="submit" class="btn btn-primary">
         {% include "partials/icon.html" with name="plus" %}
         {% if item %}Salvar alterações{% else %}Cadastrar item{% endif %}
@@ -80,7 +86,8 @@
       {% else %}
         <p class="side-card-text">Precisa registrar algo específico desta coleção, como número de série, gravadora ou tiragem? Crie campos próprios para ela.</p>
       {% endif %}
-      <a class="btn btn-secondary btn-sm" href="{% url 'collection_fields' collection.pk %}">
+      {# Leva o endereço deste formulário: a página de campos mostra "Voltar ao item" e o rascunho é restaurado #}
+      <a class="btn btn-secondary btn-sm" href="{% url 'collection_fields' collection.pk %}?voltar={{ request.path|urlencode }}">
         {% include "partials/icon.html" with name="sliders" %}
         Gerenciar campos
       </a>
@@ -97,3 +104,5 @@
   </aside>
 </form>
 {% endblock %}
+
+{% block scripts %}<script src="{% static 'js/rascunho.js' %}" defer></script>{% endblock %}

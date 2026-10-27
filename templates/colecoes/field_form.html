@@ -7,7 +7,7 @@
   <ol>
     <li><a href="{% url 'collection_list' %}">Minhas coleções</a></li>
     <li><a href="{% url 'collection_detail' collection.pk %}">{{ collection.name }}</a></li>
-    <li><a href="{% url 'collection_fields' collection.pk %}">Campos personalizados</a></li>
+    <li><a href="{{ fields_url }}">Campos personalizados</a></li>
     <li aria-current="page">Renomear</li>
   </ol>
 </nav>
@@ -23,7 +23,7 @@
   {% include "partials/field.html" with field=form.name %}
   {% include "partials/field.html" with field=form.field_type %}
   <div class="form-actions">
-    <a class="btn btn-secondary" href="{% url 'collection_fields' collection.pk %}">Cancelar</a>
+    <a class="btn btn-secondary" href="{{ fields_url }}">Cancelar</a>
     <button type="submit" class="btn btn-primary">Salvar</button>
   </div>
 </form>

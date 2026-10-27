@@ -70,6 +70,7 @@ pelo deploy automático. Assim, problemas de infraestrutura aparecem com tempo p
 - [x] Prévia da capa ao escolher a imagem (`static/js/capa.js`, CSP `img-src blob:`)
 - [x] Validação antes do envio (mantém a capa escolhida), categoria obrigatória de fato
 - [x] Seed de demonstração (`manage.py seed_demo`, só em desenvolvimento)
+- [x] Saudação com os dois primeiros nomes; "Voltar ao item" e rascunho do formulário de item ao gerenciar campos
 - [x] Estados vazios e erros de formulário
 - [x] Todas as consultas filtradas pelo dono (regras da seção 8 do `CLAUDE.md`)
 

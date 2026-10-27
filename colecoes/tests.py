@@ -690,3 +690,61 @@ class SeedDemoTests(TestCase):
         self.run_seed('--reset')
         self.assertEqual(get_user_model().objects.count(), 2)
         self.assertEqual(Collection.objects.filter(user__email='ana@demo.coletta.local').count(), 7)
+
+
+class FirstNamesFilterTests(TestCase):
+    def test_primeiros_nomes(self):
+        from colecoes.templatetags.colecoes_extras import primeiros_nomes
+
+        self.assertEqual(primeiros_nomes('Lauanny Rodrigues Barreto'), 'Lauanny Rodrigues')
+        self.assertEqual(primeiros_nomes('Maria da Silva Lima'), 'Maria da Silva')
+        self.assertEqual(primeiros_nomes('Ana'), 'Ana')
+        self.assertEqual(primeiros_nomes(''), '')
+
+
+class ReturnToItemFormTests(BaseTestCase):
+    """?voltar= na página de campos: só aceita o formulário de item da própria coleção (sem open redirect)."""
+
+    def setUp(self):
+        super().setUp()
+        self.vinis = Collection.objects.create(user=self.ana, name='Vinis', category='musica')
+        self.outra = Collection.objects.create(user=self.ana, name='Outra', category='outros')
+        self.item = CollectionItem.objects.create(collection=self.vinis, name='Disco')
+        self.fields_url = reverse('collection_fields', args=[self.vinis.pk])
+
+    def return_url(self, voltar):
+        return self.client.get(self.fields_url, {'voltar': voltar}).context['return_url']
+
+    def test_aceita_cadastro_e_edicao_de_item_desta_colecao(self):
+        create = reverse('item_create', args=[self.vinis.pk])
+        update = reverse('item_update', args=[self.item.pk])
+        self.assertEqual(self.return_url(create), create)
+        self.assertEqual(self.return_url(update + '?x=1'), update)
+
+    def test_ignora_enderecos_externos_e_de_outras_colecoes_ou_contas(self):
+        bia_collection = Collection.objects.create(user=self.bia, name='Da Bia', category='outros')
+        bia_item = CollectionItem.objects.create(collection=bia_collection, name='Item da Bia')
+        for voltar in [
+            'https://site-malicioso.com/', '//site-malicioso.com/', 'javascript:alert(1)',
+            reverse('item_create', args=[self.outra.pk]),
+            reverse('item_update', args=[bia_item.pk]),
+            reverse('collection_list'), '/nao-existe/',
+        ]:
+            self.assertEqual(self.return_url(voltar), '', voltar)
+
+    def test_criar_campo_mantem_o_caminho_de_volta(self):
+        create = reverse('item_create', args=[self.vinis.pk])
+        response = self.client.post(f'{self.fields_url}?voltar={create}', {'name': 'Gravadora', 'field_type': 'texto'})
+        self.assertRedirects(response, f'{self.fields_url}?voltar={create.replace("/", "%2F")}')
+        response = self.client.get(response['Location'])
+        self.assertContains(response, 'Voltar ao item')
+        self.assertContains(response, f'href="{create}"')
+
+    def test_formulario_de_item_aponta_para_campos_com_volta_e_rascunho(self):
+        create = reverse('item_create', args=[self.vinis.pk])
+        response = self.client.get(create)
+        self.assertContains(response, f'{self.fields_url}?voltar={create}')
+        self.assertContains(response, f'data-draft="item-{self.vinis.pk}-novo"')
+        # Formulário que voltou do servidor com erro não usa rascunho (os dados já estão nele)
+        response = self.client.post(create, {'name': ''})
+        self.assertNotContains(response, 'data-draft=')
