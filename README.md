@@ -558,19 +558,42 @@ Exemplos em que a IA ajudou na segurança:
 - **Acessibilidade:** o contraste das cores do protótipo foi medido; o texto secundário reprovava no
   WCAG AA e foi escurecido.
 
+### Auditoria de segurança com IA
+
+Antes da entrega, a IA fez uma varredura completa comparando o projeto com o escopo da disciplina,
+tanto no código quanto no ambiente de produção (visto de fora, como um avaliador veria):
+
+| Verificação | Como foi feita | Resultado |
+|---|---|---|
+| Segredos no repositório | busca por `.env`, bancos, chaves e padrões de senha/token em **todo o histórico** do Git | nenhum segredo real |
+| Controle de acesso | todas as views conferidas: `@login_required` e consulta filtrada pelo dono | 100% das views |
+| Injeção e XSS | busca por SQL cru (`raw`, `extra`, `cursor`), `mark_safe`, `\|safe` e `innerHTML` | sem SQL cru; os usos restantes recebem só conteúdo gerado pelo servidor |
+| Dependências | `pip-audit` no `requirements.txt` | nenhuma vulnerabilidade conhecida |
+| HTTPS e TLS | `curl` e `openssl s_client` contra o IP público | HTTP → HTTPS (301); TLS 1.2/1.3; certificado Let's Encrypt para o IP |
+| Cabeçalhos | `curl -I` em produção | CSP, HSTS, X-Frame-Options, nosniff e cookies `Secure` presentes |
+| Exposição | acesso direto a `/admin/`, `/media/`, `.env` e `.git` | todos 404 |
+| Portas | conexão às portas comuns (21, 22, 25, 80, 443, 3306, 5432, 8000, 8080) | só 22, 80 e 443 abertas |
+
+Na publicação final, o problema de permissões dos arquivos estáticos (descrito acima) foi notado em produção e
+diagnosticado com a IA, que o reproduziu localmente antes de corrigir.
+
 ## 10. Evidências
 
 As capturas ficam em [`docs/evidencias/`](docs/evidencias/).
 
 | Evidência | Arquivo |
 |---|---|
-| SSL.org: certificado confiável, assinatura e chave | ![SSL.org](docs/evidencias/ssl-org.png) |
-| SSL.org: cadeia de certificados | ![SSL.org cadeia](docs/evidencias/ssl-org-cadeia.png) |
+| SSL.org: certificado confiável, assinatura e chave | ![SSL.org](docs/evidencias/ssl-org.jpg) |
+| SSL.org: cadeia de certificados | ![SSL.org cadeia](docs/evidencias/ssl-org-cadeia.jpg) |
 | DigiCert PQC checker: Pass | ![DigiCert](docs/evidencias/digicert-pqc.png) |
 | Fail2Ban com IP banido | ![Fail2Ban](docs/evidencias/fail2ban-ban.png) |
+| SSH só com chave: tentativa de outro aparelho recusada (`Permission denied (publickey)`) | ![SSH](docs/evidencias/ssh-somente-chave.png) |
 | Pipeline do GitHub Actions verde | ![Pipeline](docs/evidencias/pipeline.png) |
+| Execução do pipeline: testes e deploy | ![Execução](docs/evidencias/pipeline-run.png) |
+| Passos do deploy (incluindo apagar a chave do runner) | ![Deploy](docs/evidencias/pipeline-deploy.png) |
 | Tela de login | ![Login](docs/evidencias/tela-login.png) |
-| Tela inicial | ![Início](docs/evidencias/tela-inicio.png) |
+| Tela inicial em produção (página interna, após o login) | ![Início](docs/evidencias/tela-inicio.png) |
+| Minhas coleções em produção (com capas) | ![Minhas coleções](docs/evidencias/tela-colecoes.png) |
 
 ## 11. Decisões e limitações
 

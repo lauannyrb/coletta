@@ -17,8 +17,8 @@ pelo deploy automático. Assim, problemas de infraestrutura aparecem com tempo p
       `STATICFILES_DIRS`, `STATIC_ROOT = BASE_DIR / "staticfiles"`
 - [x] Modelo `accounts.User` (login por e-mail) + `AUTH_USER_MODEL` — **antes da primeira migração**
 - [x] Modelos `Collection` e `CollectionItem`; `makemigrations` e `migrate`
-- [ ] Criar repositório público no GitHub (SSH/PAT, 2FA) e fazer o primeiro commit
-- [ ] Conferir com `git status` que `.env`, `db.sqlite3` e `.venv/` não aparecem
+- [x] Criar repositório público no GitHub (SSH/PAT) e fazer o primeiro commit (2FA: ver Fase 10)
+- [x] Conferir com `git status` que `.env`, `db.sqlite3` e `.venv/` não aparecem
 
 ## Fase 1 — Autenticação
 - [x] `base.html` com navbar, área de mensagens e parciais
@@ -49,7 +49,7 @@ pelo deploy automático. Assim, problemas de infraestrutura aparecem com tempo p
 - [x] Redirect 80 → 443; TLS 1.2/1.3; HSTS
 - [x] PQC: `openssl version` ≥ 3.5; `ssl_ecdh_curve` com `X25519MLKEM768` primeiro
 - [x] Validar: SSL.org (Trusted: Yes; Good signature · Good key; TLS 1.2/1.3) e DigiCert PQC checker (Pass)
-- [ ] Guardar prints das evidências para o README
+- [x] Guardar prints das evidências para o README (salvar os arquivos: ver Fase 10)
 
 ## Fase 3 — CI/CD
 - [x] Usuário de deploy com `sudo` restrito a reiniciar o serviço do Gunicorn
@@ -88,7 +88,8 @@ pelo deploy automático. Assim, problemas de infraestrutura aparecem com tempo p
 - [x] Páginas 404, 500 e 403 (CSRF) próprias, sem detalhes técnicos
 - [x] `/admin/` só existe com `DEBUG=True`
 - [x] `check --deploy` sem avisos; `--fail-level WARNING` no workflow e no `deploy/coletta-deploy`
-- [ ] Reinstalar `/usr/local/bin/coletta-deploy` no servidor e conferir os cabeçalhos em produção
+- [x] Conferir os cabeçalhos em produção (2026-10-26: CSP, HSTS, X-Frame-Options, nosniff, cookies `Secure`)
+- [ ] Reinstalar `/usr/local/bin/coletta-deploy` se diferir do repositório (ver Fase 10)
 
 ## Fase 7 — README (relatório técnico)
 - [x] Visão geral, stack e arquitetura
@@ -96,15 +97,13 @@ pelo deploy automático. Assim, problemas de infraestrutura aparecem com tempo p
 - [x] OWASP Top 10:2025: categorias mitigadas, com arquivo e linha de cada uma
 - [x] Demonstração do teste de acesso cruzado (404)
 - [x] Como rodar localmente
-- [ ] Salvar as capturas em `docs/evidencias/` (ssl-org.png, ssl-org-cadeia.png, digicert-pqc.png,
-      fail2ban-ban.png, pipeline.png, tela-login.png, tela-inicio.png)
-- [ ] Confirmar 2FA ativo na conta do GitHub (o README afirma)
+- [ ] Capturas em `docs/evidencias/` e 2FA do GitHub: ver Fase 10
 
 ## Fase 8 — Visual e extras
 - [x] Ajuste visual fiel ao protótipo do Figma (totais com detalhes reais, avatar, busca lavanda, painel do login)
 - [x] Capa das coleções (só a coleção; itens sem foto): Pillow 13, validação pelo conteúdo, regravação em
       WEBP, nome aleatório, fora da pasta pública, servida só ao dono
-- [ ] Servidor: criar `/var/lib/coletta/media`, `MEDIA_DIR` no `.env`, Nginx com `client_max_body_size 3m`
+- [x] Servidor: criar `/var/lib/coletta/media`, `MEDIA_DIR` no `.env`, Nginx com `client_max_body_size 3m`
 
 ## Fase 9 — Aplicação mais completa (inspirada nas telas novas do Figma)
 - [x] Coleção: categoria principal, ano de início, tags
@@ -113,4 +112,30 @@ pelo deploy automático. Assim, problemas de infraestrutura aparecem com tempo p
 - [x] Ficha do item; detalhe da coleção com resumo por estado, filtros e ordenação
 - [x] Formulários em duas colunas, breadcrumb, faixa da coleção, "continuar adicionando"
 - [x] README: funcionalidades, modelo de dados (Mermaid) e segurança atualizados
-- [ ] Publicar e conferir em produção
+- [x] Publicar e conferir em produção (capas em `/var/lib/coletta/media` com 600/700, Nginx com `client_max_body_size 3m`)
+
+## Fase 10 — Checagem final antes da entrega (2026-10-26)
+
+Varredura comparando o projeto com o escopo oficial da disciplina (checklist de 9 itens).
+
+**Conferido e OK:**
+- [x] Aplicação no ar por IP; HTTP → HTTPS (301); certificado Let's Encrypt para o IP (válido até 01/11, renovação automática)
+- [x] TLS só 1.2/1.3 (SSL.org); PQC `X25519MLKEM768` (DigiCert); portas abertas: só 22, 80 e 443
+- [x] Cabeçalhos em produção: CSP restrita, HSTS, X-Frame-Options DENY, nosniff, cookies `Secure`
+- [x] Página interna exige login (302 → /entrar/); `/admin/`, `/media/`, `.env` e `.git` dão 404
+- [x] Repositório público; nenhum arquivo sensível ou segredo real em todo o histórico do Git; `.gitignore` completo
+- [x] Workflow usa só GitHub Secrets e `StrictHostKeyChecking=yes`; últimos 3 deploys verdes
+- [x] Todas as views com `@login_required` e consultas pelo dono; sem SQL cru; `pip-audit` sem vulnerabilidades
+- [x] README: 6 categorias da OWASP com arquivo e linha; auditoria com IA registrada (seção 9)
+
+**Falta (tarefas da usuária):**
+- [x] Salvar as 7 capturas em `docs/evidencias/` com os nomes que o README usa (hoje as imagens aparecem
+      quebradas no GitHub): `ssl-org.jpg` ✔, `ssl-org-cadeia.jpg` ✔, `digicert-pqc.png` ✔, `fail2ban-ban.png` ✔,
+      `pipeline.png` ✔, `tela-login.png` ✔, `tela-inicio.png` ✔ (extras ✔: `tela-colecoes.png`, ✔: `ssh-somente-chave.png`, `pipeline-run.png`, `pipeline-deploy.png`)
+- [ ] Opcional, mas reforça A01 e a renovação: `isolamento-404.png` (conta B abrindo coleção da conta A) e
+      `certbot-renovacao.png` (`sudo certbot renew --dry-run` + `systemctl list-timers | grep certbot`)
+- [ ] Confirmar o 2FA na conta do GitHub (o README afirma que está ativo)
+- [ ] Servidor: `diff /usr/local/bin/coletta-deploy /srv/coletta/app/deploy/coletta-deploy`; se diferir, reinstalar
+- [ ] Antes de entregar: se a data passar de 01/11, conferir que o certificado foi renovado (`curl -vI` ou o navegador)
+- [ ] Commit final com as evidências e `git push`; conferir o pipeline verde e o README renderizado no GitHub
+

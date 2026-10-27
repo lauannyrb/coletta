@@ -220,8 +220,9 @@ Já feito:
   mostradas no terminal; contas `@demo.coletta.local`: Ana com 7 coleções/29 itens/capas e Bia com 1
   coleção para o teste de 404). 81 testes.
 
-Próximo passo: publicar (migração 0003 renomeia `category` → `edition` preservando dados); capturas em
-`docs/evidencias/`.
+Publicado e conferido em produção em 2026-10-26 (capas gravadas em `/var/lib/coletta/media/capas` com 600/700;
+Nginx com `client_max_body_size 3m`). Checagem final contra o escopo feita em 2026-10-26 (Fase 10 do `PLANO.md`): falta só o que depende da
+usuária (capturas, 2FA, conferir o script de deploy e o commit final).
 
 ### Estrutura esperada
 ```
