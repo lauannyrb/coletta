@@ -64,7 +64,7 @@ componentes do *brand guide*).
 |---|---|
 | Linguagem | Python 3.14 (gerenciado com [uv](https://docs.astral.sh/uv/)) |
 | Framework | Django 6.1 (templates renderizados no servidor) |
-| Front-end | HTML + CSS puro; seis scripts próprios e pequenos em `static/js/` (busca em tempo real, filtros automáticos, modal de exclusão, prévia da capa, validação antes do envio e rascunho do formulário de item), todos opcionais (sem JS tudo funciona); nada de CDN |
+| Front-end | HTML + CSS puro; sete scripts próprios e pequenos em `static/js/` (busca em tempo real, filtros automáticos, modal de exclusão, prévia da capa, validação antes do envio, rascunho do formulário de item e botão de mostrar senha), todos opcionais (sem JS tudo funciona); nada de CDN |
 | Banco de dados | SQLite |
 | Limite de tentativas de login | django-axes 8.3 |
 | Processamento das capas | Pillow 13.0 |
@@ -180,7 +180,7 @@ No `.env`, gere uma `SECRET_KEY` própria e, para desenvolvimento, use `DEBUG=Tr
 .venv/bin/python -c "from django.core.management.utils import get_random_secret_key as g; print(g())"
 ```
 
-Testes (86 testes automatizados):
+Testes (87 testes automatizados):
 
 ```bash
 .venv/bin/python manage.py test
@@ -483,7 +483,7 @@ flowchart TD
 
     subgraph CI["Job 1 · Testes e verificações"]
         B["Python 3.14 + dependências<br/>(uv)"] --> C["check --deploy<br/>qualquer aviso reprova"]
-        C --> T["86 testes automatizados"]
+        C --> T["87 testes automatizados"]
         T --> P["pip-audit<br/>vulnerabilidade conhecida reprova"]
     end
 

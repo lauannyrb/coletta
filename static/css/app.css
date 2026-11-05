@@ -153,6 +153,33 @@ a:hover { color: var(--color-primary-dark); }
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .input-wrap--icon input { padding-left: 44px; }
+
+/* Botão de mostrar senha (static/js/senha.js) */
+.input-wrap--password input { padding-right: 52px; }
+.input-wrap--password input::-ms-reveal { display: none; }
+.password-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color 0.15s, background-color 0.15s;
+}
+.password-toggle:hover,
+.password-toggle[aria-pressed="true"] { color: var(--color-primary); background: var(--color-lavender); }
+.password-toggle:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 1px; }
+.password-toggle > span { display: inline-flex; }
+.password-toggle > span[hidden] { display: none; }
 .field textarea { min-height: 0; padding: 12px 14px; resize: vertical; line-height: 1.5; }
 .field input::placeholder,
 .field textarea::placeholder { color: var(--color-text-muted); opacity: 0.8; }

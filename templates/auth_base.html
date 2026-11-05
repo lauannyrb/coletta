@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block body_class %}page-auth{% endblock %}
 
@@ -42,4 +43,14 @@
     </blockquote>
   </aside>
 </main>
+
+{# Botão de mostrar senha, copiado pelo static/js/senha.js para cada campo de senha #}
+<template id="botao-senha">
+  <button type="button" class="password-toggle" aria-pressed="false">
+    <span data-icon="mostrar">{% include "partials/icon.html" with name="eye" %}</span>
+    <span data-icon="ocultar" hidden>{% include "partials/icon.html" with name="eye-off" %}</span>
+    <span class="visually-hidden">Mostrar senha</span>
+  </button>
+</template>
+<script src="{% static 'js/senha.js' %}" defer></script>
 {% endblock %}

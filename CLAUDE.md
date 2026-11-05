@@ -225,6 +225,8 @@ Já feito:
   `_item_form_return` só aceita cadastro/edição de item da mesma coleção (sem open redirect) e a página de
   campos mostra "Voltar ao item". `static/js/rascunho.js` guarda o formulário de item na `sessionStorage`
   (`data-draft`, só quando o form não veio do servidor com erro) e restaura ao voltar. 86 testes.
+- **Mostrar senha** (pedido da usuária): login e cadastro têm botão de olho (`static/js/senha.js`, carregado no
+  `auth_base.html`, que copia o `<template id="botao-senha">`); ao enviar, o campo volta a ser de senha. 87 testes.
 - **Responsividade revisada** (2026-10-26): todas as telas varridas em 320/375/768/900/1024 px sem estouro
   horizontal. Menu no topo até 900 px (tablets); cabeçalhos com ações quebram linha quando não cabem;
   até 480 px: botões de formulário/confirmação em largura total (ação principal em cima) e a busca sem o

@@ -104,6 +104,12 @@ class LoginLogoutTests(TestCase):
             self.assertContains(response, 'E-mail ou senha inválidos.')
         self.assertNotIn('_auth_user_id', self.client.session)
 
+    def test_login_e_cadastro_tem_botao_de_mostrar_senha(self):
+        for url in (reverse('login'), reverse('signup')):
+            response = self.client.get(url)
+            self.assertContains(response, 'id="botao-senha"')
+            self.assertContains(response, 'js/senha.js')
+
     def test_home_exige_login(self):
         response = self.client.get(reverse('home'))
         self.assertRedirects(response, f"{reverse('login')}?next={reverse('home')}")
